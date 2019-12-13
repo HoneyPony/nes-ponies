@@ -57,8 +57,7 @@ draw_ground:
 		
 	rts
 	
-	
-main:
+sample_palettes:
 	; Load from ppustatus before writing palettes
 	; This ensures that PPUADDR accepts high byte first
 	ldx PPUSTATUS
@@ -67,7 +66,7 @@ main:
 	ldx #$00
 	stx PPUADDR
 	
-	; Palette 0
+	; Palettes
 	ldx #$00
 .write_palette:
 	
@@ -83,9 +82,83 @@ main:
 	cpx #8
 	bne .write_palette
 	
-	ldx #$FF
-	txs
+	; sprite palette
+	ldx PPUSTATUS
+	ldx #$3f
+	stx PPUADDR
+	ldx #$10
+	stx PPUADDR
 	
+	lda #$0f
+	sta PPUDATA
+	lda #$11
+	sta PPUDATA
+	lda #$21
+	sta PPUDATA
+	lda #$31
+	sta PPUDATA
+	
+	rts
+	
+sample_sprite_init:
+	; sprite
+	lda #$70
+	sta $200
+	lda #$00
+	sta $201
+	lda #%00000000
+	sta $202
+	lda #$70
+	sta $203
+	
+	; position data: $010:$011 = x, $012:$013 = y
+	lda #$70
+	sta $010
+	lda #$00
+	sta $011
+	
+	lda #$70
+	sta $012
+	lda #$00
+	sta $013
+	
+	rts
+	
+sample_sprite_update:
+	clc
+	lda $011
+	adc #$01
+	sta $011
+	lda $010
+	adc #$00
+	sta $010
+	sta $203
+	
+	rts
+	
+sample_sprite_update_2:
+	clc
+	lda $021
+	adc #$01
+	sta $021
+	lda $020
+	adc #$00
+	sta $020
+	sta $020
+	
+	rts
+	
+tick:
+	jsr sample_sprite_update
+	jsr sample_sprite_update_2
+
+	jmp tick
+	
+
+	
+main:
+	jsr sample_palettes
+	jsr sample_sprite_init
 	jsr fill_nametable
 	jsr draw_ground
 	
@@ -96,13 +169,13 @@ main:
 	ldx #$00
 	stx PPUADDR
 	
-	lda #%10000000
+	; Enable rendering
+	lda #%10001000
 	sta PPUCTRL
 	lda #%00011110
 	sta PPUMASK
 	
-	.forever:
-		jmp .forever
+	jmp tick
 
 
 	.bank 1

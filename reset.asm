@@ -7,4 +7,8 @@ reset_handler:
 .vblankwait:
 	bit PPUSTATUS
 	bpl .vblankwait
+	
+	ldx #$FF ; Set up stack
+	txs
+	
 	jmp main

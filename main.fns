@@ -1,6 +1,11 @@
 ; main.asm
-main                             = $C064
-draw_ground                      = $C03C
+sample_palettes                  = $C06B
+main                             = $C111
+sample_sprite_update_2           = $C0F3
+tick                             = $C108
+draw_ground                      = $C043
 nmi_handler                      = $C000
-reset_handler                    = $C00B
-fill_nametable                   = $C01D
+sample_sprite_init               = $C0B5
+sample_sprite_update             = $C0DE
+reset_handler                    = $C00F
+fill_nametable                   = $C024
