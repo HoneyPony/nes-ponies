@@ -1,6 +1,13 @@
 	.include "constants.asm"
 	.include "header.asm"
 
+	.zp
+	control_1: ds 1
+	control_2: ds 1
+	player_x: ds 2
+	player_y: ds 2
+	
+	.code
 	.bank 0
 	.org $C000
 
@@ -113,46 +120,73 @@ sample_sprite_init:
 	
 	; position data: $010:$011 = x, $012:$013 = y
 	lda #$70
-	sta $010
+	sta player_x
 	lda #$00
-	sta $011
+	sta player_x + 1
 	
 	lda #$70
-	sta $012
+	sta player_y
 	lda #$00
-	sta $013
+	sta player_y + 1
 	
 	rts
 	
-sample_sprite_update:
+sample_sprite_mr:
 	clc
-	lda $011
+	lda player_x + 1
 	adc #$01
-	sta $011
-	lda $010
+	sta player_x + 1
+	lda player_x 
 	adc #$00
-	sta $010
+	sta player_x
 	sta $203
 	
 	rts
 	
-sample_sprite_update_2:
+sample_sprite_ml:
 	clc
-	lda $021
-	adc #$01
-	sta $021
-	lda $020
-	adc #$00
-	sta $020
-	sta $020
+	lda player_x + 1
+	sbc #$01
+	sta player_x + 1
+	lda player_x 
+	sbc #$00
+	sta player_x
+	sta $203
 	
 	rts
 	
-tick:
-	jsr sample_sprite_update
-	jsr sample_sprite_update_2 ; if we comment this out the sprite moves twice as fast
-
-	jmp tick
+readjoy:
+    lda #$01
+    ; While the strobe bit is set, buttons will be continuously reloaded.
+    ; This means that reading from JOYPAD1 will only return the state of the
+    ; first button: button A.
+    sta JOYPAD1
+    sta control_1
+    lsr a        ; now A is 0
+    ; By storing 0 into JOYPAD1, the strobe bit is cleared and the reloading stops.
+    ; This allows all 8 buttons (newly reloaded) to be read from JOYPAD1.
+    sta JOYPAD1
+loop:
+    lda JOYPAD1
+    lsr a	       ; bit 0 -> Carry
+    rol control_1  ; Carry -> bit 0; bit 7 -> Carry
+    bcc loop
+    rts
+	
+idle:
+	jsr readjoy
+	lda control_1
+	and #$01
+	beq .next_test
+	jsr sample_sprite_mr
+.next_test:
+	lda control_1
+	and #%00000010
+	beq .after_left
+	jsr sample_sprite_ml
+.after_left
+	
+	jmp idle
 	
 
 	
@@ -175,7 +209,7 @@ main:
 	lda #%00011110
 	sta PPUMASK
 	
-	jmp tick
+	jmp idle
 
 
 	.bank 1

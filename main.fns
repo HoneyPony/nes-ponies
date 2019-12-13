@@ -1,11 +1,13 @@
 ; main.asm
+sample_sprite_mr                 = $C0DE
 sample_palettes                  = $C06B
-main                             = $C111
-sample_sprite_update_2           = $C0F3
-tick                             = $C108
+main                             = $C138
+readjoy                          = $C108
 draw_ground                      = $C043
 nmi_handler                      = $C000
+loop                             = $C114
 sample_sprite_init               = $C0B5
-sample_sprite_update             = $C0DE
+idle                             = $C11E
 reset_handler                    = $C00F
+sample_sprite_ml                 = $C0F3
 fill_nametable                   = $C024
