@@ -150,7 +150,7 @@ sample_sprite_update_2:
 	
 tick:
 	jsr sample_sprite_update
-	jsr sample_sprite_update_2
+	jsr sample_sprite_update_2 ; if we comment this out the sprite moves twice as fast
 
 	jmp tick
 	
