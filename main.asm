@@ -14,13 +14,14 @@ fill_nametable:
 	ldx #$00
 	stx PPUADDR
 	
+	lda #$FF
 	ldy #$00
 	
 	.yloop:
 		ldx #$00
 		.xloop:
 			
-			lda #$01
+			
 			sta PPUDATA
 			inx
 			bne .xloop
@@ -28,6 +29,31 @@ fill_nametable:
 		iny
 		cpy #$4
 		bne .yloop
+		
+	rts
+	
+draw_ground:
+	ldx PPUSTATUS
+	ldx #$21
+	stx PPUADDR
+	ldx #$C7
+	stx PPUADDR
+	
+	lda #$04
+	sta PPUDATA
+	
+	lda #$00
+	ldx #$00
+	.xloop:
+		sta PPUDATA
+		inx
+		adc #1
+		and #%00000011
+		cpx #18
+		bne .xloop
+	
+	lda #$05
+	sta PPUDATA
 		
 	rts
 	
@@ -60,7 +86,15 @@ main:
 	ldx #$FF
 	txs
 	
-	call fill_nametable
+	jsr fill_nametable
+	jsr draw_ground
+	
+	; Reset PPUADDR ..?
+	ldx PPUSTATUS
+	ldx #$20
+	stx PPUADDR
+	ldx #$00
+	stx PPUADDR
 	
 	lda #%10000000
 	sta PPUCTRL
