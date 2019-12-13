@@ -1,0 +1,5 @@
+; main.asm
+main                             = $C03C
+nmi_handler                      = $C000
+reset_handler                    = $C00B
+fill_nametable                   = $C01D
