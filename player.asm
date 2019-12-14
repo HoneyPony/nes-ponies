@@ -65,9 +65,27 @@ player_integrate:
 	rts
 	
 player_tick:
+	lda pvel_x
+	bmi .pvel_negative
+	beq .pvel_zero
+; Implicitly: pvel_x is now positive so we need to make acc negative
+	ldx #$FF
+	stx pacc_x + 1
+	stx pacc_x
+	jmp .pacc_configured
+
+.pvel_negative:
 	ldx #$00
 	stx pacc_x + 1
-
+	ldx #$01
+	stx pacc_x
+	jmp .pacc_configured
+	
+.pvel_zero:
+	ldx #$00
+	stx pacc_x + 1
+	
+.pacc_configured:
 	lda control_1
 	and #$01
 	beq .done_test_right
@@ -80,6 +98,7 @@ player_tick:
 	stx pacc_x + 1
 .done_test_left:
 	stx pacc_x
+	
 	jsr player_integrate
 	
 ; copy to player sprite
