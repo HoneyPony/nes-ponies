@@ -1,5 +1,5 @@
-MAX_VEL_X = 128
-MAX_VEL_Y = 128
+MAX_VEL_X = 24
+MAX_VEL_Y = 24
 
 SPRITE = $200
 
@@ -7,82 +7,71 @@ SPRITE = $200
 ; Player data
 ppos_x: ds 2
 ppos_y: ds 2
-pvel_x: ds 1
+pvel_x: ds 2
 pvel_y: ds 1
-pacc_x: ds 1
+pacc_x: ds 2
 pacc_y: ds 1
+
+	.data
+	.bank 0
+	.org $C000
+sign_bit .db 1 << 7
 
 	.code
 	.bank 0
+	
 player_integrate:
 ; Integrate acceleration x
+	
+	; low byte
+	clc
+	lda pacc_x
+	adc pvel_x
+	sta pvel_x
+	lda pacc_x + 1
+	adc pvel_x + 1
+	sta pvel_x + 1
+
+; Clamp velocity: only need to read from low byte for now
 	clc
 	lda pvel_x
-	adc pacc_x
-; Clamp velocity
-	
-	lda pvel_x
 	; Test sign bit
-	and #1 << 7
+	bit sign_bit
 	beq .x_sign_clear
 
 	cmp #-MAX_VEL_X
-	bpl x_finished
+	bpl .x_integrate_pos
+	lda #$FF
+	sta pvel_x + 1
 	lda #-MAX_VEL_X
 	sta pvel_x
 	
 .x_sign_clear:
 	cmp #MAX_VEL_X
-	bpl x_finished
-	lda MAX_VEL_X
+	bmi .x_integrate_pos
+	lda #$00
+	sta pvel_x + 1
+	lda #MAX_VEL_X
 	sta pvel_x
 	
+.x_integrate_pos:
+	; we reach this point with pvel_x in accumulator
+
 	; integrate low byte
 	adc ppos_x
 	sta ppos_x
 	; integrate high byte
-	lda #$00
+	lda pvel_x + 1
 	adc ppos_x + 1
 	sta ppos_x + 1
-	
-
-x_finished:
-
-	; Y velocity
-	clc
-	lda pvel_y
-	adc pacc_y
-	
-	lda pvel_y
-	; Test sign bit
-	and #1 << 7
-	beq .y_sign_clear
-
-	cmp #-MAX_VEL_Y
-	bpl y_finished
-	lda #-MAX_VEL_Y
-	sta pvel_y
-	
-.y_sign_clear:
-	cmp #MAX_VEL_Y
-	bpl y_finished
-	lda MAX_VEL_Y
-	sta pvel_y
-	
-y_finished:
-
-	; integrate low byte
-	adc ppos_y
-	sta ppos_y
-	; integrate high byte
-	lda #$00
-	adc ppos_y + 1
-	sta ppos_y + 1
 
 	rts
 	
 player_tick:
-	ldx #$00
+	ldx #$FF
+	stx pacc_x + 1
+	ldx #$FF
+	stx pacc_x
 
 	lda control_1
 	and #$01
@@ -100,7 +89,7 @@ player_tick:
 ; copy to player sprite
 	ldx ppos_y + 1
 	dex
-	stx SPRITE
+	; stx SPRITE
 	ldx ppos_x + 1
 	stx SPRITE + 3
 	

@@ -9,11 +9,9 @@
 control_1: ds 1
 control_2: ds 1
 
-	
-	
 	.code
 	.bank 0
-	.org $C000
+	.org $C100
 
 	.include "nmi.asm"
 	.include "reset.asm"
