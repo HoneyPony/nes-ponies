@@ -67,18 +67,17 @@ player_integrate:
 player_tick:
 	ldx #$00
 	stx pacc_x + 1
-	ldx #$01
-	stx pacc_x
 
 	lda control_1
 	and #$01
 	beq .done_test_right
-	ldx #$01
+	ldx #1 << 0
 .done_test_right:
 	lda control_1
-	and #1
+	and #1 << 1
 	beq .done_test_left
-	ldx #-1
+	ldx #$FF
+	stx pacc_x + 1
 .done_test_left:
 	stx pacc_x
 	jsr player_integrate
