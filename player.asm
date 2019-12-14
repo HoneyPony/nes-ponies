@@ -15,8 +15,7 @@ pacc_y: ds 1
 	.data
 	.bank 0
 	.org $C000
-sign_bit .db 1 << 7
-
+	
 	.code
 	.bank 0
 	
@@ -35,23 +34,21 @@ player_integrate:
 ; Clamp velocity: only need to read from low byte for now
 	clc
 	lda pvel_x
-	; Test sign bit
-	bit sign_bit
-	beq .x_sign_clear
+	bmi .x_negative
 
-	cmp #-MAX_VEL_X
-	bpl .x_integrate_pos
-	lda #$FF
-	sta pvel_x + 1
-	lda #-MAX_VEL_X
-	sta pvel_x
-	
-.x_sign_clear:
 	cmp #MAX_VEL_X
 	bmi .x_integrate_pos
 	lda #$00
 	sta pvel_x + 1
 	lda #MAX_VEL_X
+	sta pvel_x
+	
+.x_negative:
+	cmp #-MAX_VEL_X
+	bpl .x_integrate_pos
+	lda #$FF
+	sta pvel_x + 1
+	lda #-MAX_VEL_X
 	sta pvel_x
 	
 .x_integrate_pos:
@@ -68,9 +65,9 @@ player_integrate:
 	rts
 	
 player_tick:
-	ldx #$FF
+	ldx #$00
 	stx pacc_x + 1
-	ldx #$FF
+	ldx #$01
 	stx pacc_x
 
 	lda control_1
