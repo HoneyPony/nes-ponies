@@ -2,10 +2,14 @@
 	.include "header.asm"
 
 	.zp
-	control_1: ds 1
-	control_2: ds 1
-	player_x: ds 2
-	player_y: ds 2
+; Controller bytes
+; Bitmap:
+; |   7    |   6    |   5    |   4    |   3    |   2    |   1    |   0    |
+; |   A    |   B    | Select | Start  |   Up   |  Down  |  Left  |  Right |
+control_1: ds 1
+control_2: ds 1
+
+	
 	
 	.code
 	.bank 0
@@ -13,6 +17,7 @@
 
 	.include "nmi.asm"
 	.include "reset.asm"
+	.include "player.asm"
 	
 fill_nametable:
 	ldx PPUSTATUS
@@ -107,54 +112,6 @@ sample_palettes:
 	
 	rts
 	
-sample_sprite_init:
-	; sprite
-	lda #$70
-	sta $200
-	lda #$00
-	sta $201
-	lda #%00000000
-	sta $202
-	lda #$70
-	sta $203
-	
-	; position data: $010:$011 = x, $012:$013 = y
-	lda #$70
-	sta player_x
-	lda #$00
-	sta player_x + 1
-	
-	lda #$70
-	sta player_y
-	lda #$00
-	sta player_y + 1
-	
-	rts
-	
-sample_sprite_mr:
-	clc
-	lda player_x + 1
-	adc #$01
-	sta player_x + 1
-	lda player_x 
-	adc #$00
-	sta player_x
-	sta $203
-	
-	rts
-	
-sample_sprite_ml:
-	clc
-	lda player_x + 1
-	sbc #$01
-	sta player_x + 1
-	lda player_x 
-	sbc #$00
-	sta player_x
-	sta $203
-	
-	rts
-	
 readjoy:
     lda #$01
     ; While the strobe bit is set, buttons will be continuously reloaded.
@@ -175,16 +132,8 @@ loop:
 	
 idle:
 	jsr readjoy
-	lda control_1
-	and #$01
-	beq .next_test
-	jsr sample_sprite_mr
-.next_test:
-	lda control_1
-	and #%00000010
-	beq .after_left
-	jsr sample_sprite_ml
-.after_left
+	
+	jsr player_tick
 	
 	jmp idle
 	
@@ -192,9 +141,10 @@ idle:
 	
 main:
 	jsr sample_palettes
-	jsr sample_sprite_init
 	jsr fill_nametable
 	jsr draw_ground
+	
+	jsr player_init
 	
 	; Reset PPUADDR ..?
 	ldx PPUSTATUS
