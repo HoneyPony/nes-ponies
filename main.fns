@@ -1,13 +1,13 @@
 ; main.asm
-sample_palettes                  = $C223
-main                             = $C28C
-readjoy                          = $C26D
-draw_ground                      = $C1FB
+palettes                         = $C000
+main                             = $C29A
+readjoy                          = $C273
+draw_ground                      = $C24B
 nmi_handler                      = $C100
-loop                             = $C279
-player_tick                      = $C169
-player_init                      = $C1B3
-idle                             = $C283
-reset_handler                    = $C10F
-player_integrate                 = $C124
-fill_nametable                   = $C1DC
+player_tick                      = $C19C
+player_init                      = $C1E7
+idle                             = $C289
+reset_handler                    = $C112
+load_palettes_by_x               = $C210
+player_integrate                 = $C157
+fill_nametable                   = $C22C

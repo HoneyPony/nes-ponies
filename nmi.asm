@@ -8,6 +8,8 @@ nmi_handler:
 	lda #$02
 	sta OAMDMA
 	
+	inc cycle_flag
+	
 	plp
 	pla
 	rti

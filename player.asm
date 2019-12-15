@@ -1,4 +1,4 @@
-MAX_VEL_X = 24
+MAX_VEL_X = 64
 MAX_VEL_Y = 24
 
 SPRITE = $200
@@ -15,6 +15,47 @@ pacc_y: ds 1
 	.data
 	.bank 0
 	.org $C000
+	
+palettes:
+	.db $0A
+	.db $17
+	.db $07
+	.db $19
+	
+	.db $0A
+	.db $17
+	.db $07
+	.db $19
+	
+	.db $0A
+	.db $17
+	.db $07
+	.db $19
+	
+	.db $0A
+	.db $17
+	.db $07
+	.db $19
+	
+	.db $0F
+	.db $11
+	.db $21
+	.db $31
+	
+	.db $0F
+	.db $11
+	.db $21
+	.db $31
+	
+	.db $0F
+	.db $11
+	.db $21
+	.db $31
+	
+	.db $0F
+	.db $11
+	.db $21
+	.db $31
 	
 	.code
 	.bank 0
@@ -65,6 +106,7 @@ player_integrate:
 	rts
 	
 player_tick:
+	clc
 	lda pvel_x
 	bmi .pvel_negative
 	beq .pvel_zero
