@@ -9,14 +9,25 @@ control_2: ds 1
 ; cycle flag
 cycle_flag: ds 1
 
+	.data
+	.bank 0
+	.org $C000
+	
+	.include "palettes.asm"
+
 	.code
 	.bank 0
-	.org $C100
+	.org $C200
 
 	.include "nmi.asm"
 	.include "reset.asm"
 	.include "player.asm"
+	.include "map.asm"
 	
+; Loads a complete set of palettes, including background and sprite palettes.
+; The palettes are loaded starting at `palettes`, plus the x index register.
+; This enables 8 completely different sets of palettes to be loaded based on the 
+; initial x index.
 load_palettes_by_x:
 	lda PPUSTATUS
 	lda #$3F
@@ -36,56 +47,6 @@ load_palettes_by_x:
 		cpy #$1F
 		bne .loop
 	
-	rts
-	
-fill_nametable:
-	ldx PPUSTATUS
-	ldx #$20
-	stx PPUADDR
-	ldx #$00
-	stx PPUADDR
-	
-	lda #$FF
-	ldy #$00
-	
-	.yloop:
-		ldx #$00
-		.xloop:
-			
-			
-			sta PPUDATA
-			inx
-			bne .xloop
-		
-		iny
-		cpy #$4
-		bne .yloop
-		
-	rts
-	
-draw_ground:
-	ldx PPUSTATUS
-	ldx #$21
-	stx PPUADDR
-	ldx #$C7
-	stx PPUADDR
-	
-	lda #$04
-	sta PPUDATA
-	
-	lda #$00
-	ldx #$00
-	.xloop:
-		sta PPUDATA
-		inx
-		adc #1
-		and #%00000011
-		cpx #18
-		bne .xloop
-	
-	lda #$05
-	sta PPUDATA
-		
 	rts
 	
 readjoy:
@@ -116,14 +77,15 @@ idle:
 	
 	jmp idle
 	
-
-	
 main:
 	; Load initial palettes
 	ldx #00
 	jsr load_palettes_by_x
 
 	jsr player_init
+	
+	ldx #$00
+	jsr load_map_from_table
 	
 	; Reset PPUADDR ..?
 	ldx PPUSTATUS

@@ -11,51 +11,6 @@ pvel_x: ds 2
 pvel_y: ds 1
 pacc_x: ds 2
 pacc_y: ds 1
-
-	.data
-	.bank 0
-	.org $C000
-	
-palettes:
-	.db $0A
-	.db $17
-	.db $07
-	.db $19
-	
-	.db $0A
-	.db $17
-	.db $07
-	.db $19
-	
-	.db $0A
-	.db $17
-	.db $07
-	.db $19
-	
-	.db $0A
-	.db $17
-	.db $07
-	.db $19
-	
-	.db $0F
-	.db $11
-	.db $21
-	.db $31
-	
-	.db $0F
-	.db $11
-	.db $21
-	.db $31
-	
-	.db $0F
-	.db $11
-	.db $21
-	.db $31
-	
-	.db $0F
-	.db $11
-	.db $21
-	.db $31
 	
 	.code
 	.bank 0
