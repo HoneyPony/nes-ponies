@@ -1,4 +1,4 @@
-nmi_handler:
+.proc nmi_handler
 	; OAM DMA update
 	pha
 	php
@@ -13,3 +13,4 @@ nmi_handler:
 	plp
 	pla
 	rti
+.endproc
