@@ -19,7 +19,7 @@ typedef unsigned char byte_t;
 
 const byte_t palette[] = {
 	0x31, 0x06, 0x16, 0x1A,
-	0x0F, 0x0F, 0x0F, 0x0F,
+	0x31, 0x0F, 0x0F, 0x0F,
 	0x0F, 0x0F, 0x0F, 0x0F,
 	0x0F, 0x0F, 0x0F, 0x0F,
 	
@@ -30,7 +30,8 @@ const byte_t palette[] = {
 };
 
 const byte_t map_0[] = {
-	0x01, 0x00, 5,
+	0x01, 0b00100010, 5,
+	0x02, 0b00010110, 5,
 	0x00
 };
 
@@ -96,6 +97,37 @@ void load_map(const byte_t *map) {
 			}
 			out_nt(GR_B);
 			out_nt(GR_BR);
+			
+			++i;
+		}
+		case 0x02: {
+			x = map[++i];
+			y = x >> 4;
+			x = x & 0xF;
+			set_nt(x << 1, y << 1);
+			
+			out_nt(GR_TL);
+			out_nt(GR_TR);
+			
+			len = map[++i];
+			
+			set_nt(x << 1, ((y + len) << 1) + 1);
+			out_nt(GR_L);
+			out_nt(GR_R);
+			
+			set_nt(x << 1, ((y + len) << 1) + 2);
+			out_nt(GR_BL);
+			out_nt(GR_BR);
+			
+			while(len) {
+				set_nt(x << 1, (y + len) << 1);
+				out_nt(GR_L);
+				out_nt(GR_R);
+				set_nt(x << 1, ((y + len) << 1) - 1);
+				out_nt(GR_L);
+				out_nt(GR_R);
+				--len;
+			}
 			
 			++i;
 		}
