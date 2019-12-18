@@ -17,16 +17,46 @@
 
 typedef unsigned char byte_t;
 
+extern byte_t *sprite_ram;
+
+byte_t collision_bitmap[240];
+byte_t cbit_ptr = 0;
+byte_t cbit_shift = 0;
+
+void out_cb(byte_t k) {
+	byte_t r = collision_bitmap[cbit_ptr];
+	r = ((r & 0x3) << cbit_shift) | (k << cbit_shift);
+	cbit_shift -= 2;
+	if(cbit_shift > 6) {
+		cbit_shift = 6;
+		++cbit_ptr;
+	}
+}
+
+void set_cb(byte_t x, byte_t y) {
+	byte_t x_cel = x >> 2;
+	cbit_ptr = x_cel + y << 3;
+	/* Given x from 0 to 4, our shift should be:
+	 * x == 0 -> 6
+	 * x == 1 -> 4
+	 * x == 2 -> 2
+	 * x == 3 -> 0
+	 * this can be calculated with 6 - (x << 1)
+	 */
+	x = x & 0x3;
+	cbit_shift = 6 - (x << 1);
+}
+
 const byte_t palette[] = {
 	0x31, 0x06, 0x16, 0x1A,
 	0x31, 0x0F, 0x0F, 0x0F,
 	0x0F, 0x0F, 0x0F, 0x0F,
 	0x0F, 0x0F, 0x0F, 0x0F,
 	
-	0x0F, 0x0F, 0x0F, 0x0F,
-	0x0F, 0x0F, 0x0F, 0x0F,
-	0x0F, 0x0F, 0x0F, 0x0F,
-	0x0F, 0x0F, 0x0F, 0x0F
+	0x31, 0x30, 0x30, 0x30,
+	0x30, 0x30, 0x30, 0x30,
+	0x30, 0x30, 0x30, 0x30,
+	0x30, 0x30, 0x30, 0x30
 };
 
 const byte_t map_0[] = {
@@ -40,6 +70,16 @@ void set_nt(byte_t x, byte_t y) {
 	address = x + ((unsigned short)y << 5) + 0x2000;
 	PPU.vram.address = address >> 8;
 	PPU.vram.address = address;
+}
+
+void set_nt_cb(byte_t x, byte_t y) {
+	set_nt(x, y);
+	set_cb(x, y);
+}
+
+void out_nt_cb(byte_t v) {
+	out_nt(v);
+	out_cb(v);
 }
 
 void load_map(const byte_t *map) {
@@ -70,33 +110,33 @@ void load_map(const byte_t *map) {
 			x = map[++i];
 			y = x >> 4;
 			x = x & 0xF;
-			set_nt(x << 1, y << 1);
+			set_nt_cb(x << 1, y << 1);
 			
-			out_nt(GR_TL);
-			out_nt(GR_T);
+			out_nt_cb(GR_TL);
+			out_nt_cb(GR_T);
 			
 			len = map[++i];
 			while(len) {
-				out_nt(GR_T);
-				out_nt(GR_T);
+				out_nt_cb(GR_T);
+				out_nt_cb(GR_T);
 				--len;
 			}
-			out_nt(GR_T);
-			out_nt(GR_TR);
+			out_nt_cb(GR_T);
+			out_nt_cb(GR_TR);
 			
-			set_nt(x << 1, (y << 1) + 1);
+			set_nt_cb(x << 1, (y << 1) + 1);
 			
-			out_nt(GR_BL);
-			out_nt(GR_B);
+			out_nt_cb(GR_BL);
+			out_nt_cb(GR_B);
 			
 			len = map[i];
 			while(len) {
-				out_nt(GR_B);
-				out_nt(GR_B);
+				out_nt_cb(GR_B);
+				out_nt_cb(GR_B);
 				--len;
 			}
-			out_nt(GR_B);
-			out_nt(GR_BR);
+			out_nt_cb(GR_B);
+			out_nt_cb(GR_BR);
 			
 			++i;
 		}
@@ -104,28 +144,28 @@ void load_map(const byte_t *map) {
 			x = map[++i];
 			y = x >> 4;
 			x = x & 0xF;
-			set_nt(x << 1, y << 1);
+			set_nt_cb(x << 1, y << 1);
 			
 			out_nt(GR_TL);
 			out_nt(GR_TR);
 			
 			len = map[++i];
 			
-			set_nt(x << 1, ((y + len) << 1) + 1);
-			out_nt(GR_L);
-			out_nt(GR_R);
+			set_nt_cb(x << 1, ((y + len) << 1) + 1);
+			out_nt_cb(GR_L);
+			out_nt_cb(GR_R);
 			
-			set_nt(x << 1, ((y + len) << 1) + 2);
-			out_nt(GR_BL);
-			out_nt(GR_BR);
+			set_nt_cb(x << 1, ((y + len) << 1) + 2);
+			out_nt_cb(GR_BL);
+			out_nt_cb(GR_BR);
 			
 			while(len) {
-				set_nt(x << 1, (y + len) << 1);
-				out_nt(GR_L);
-				out_nt(GR_R);
-				set_nt(x << 1, ((y + len) << 1) - 1);
-				out_nt(GR_L);
-				out_nt(GR_R);
+				set_nt_cb(x << 1, (y + len) << 1);
+				out_nt_cb(GR_L);
+				out_nt_cb(GR_R);
+				set_nt_cb(x << 1, ((y + len) << 1) - 1);
+				out_nt_cb(GR_L);
+				out_nt_cb(GR_R);
 				--len;
 			}
 			
@@ -154,6 +194,15 @@ void load_palettes(const byte_t *palettes) {
 	
 }
 
+void init_sprites() {
+	byte_t i = 0;
+	for(;;) {
+		sprite_ram[i] = 0xFF;
+		++i;
+		if(i == 0) return;
+	}
+}
+
 void main(void) {
 	
 	
@@ -163,9 +212,19 @@ void main(void) {
 	load_palettes(palette);
 	load_map(map_0);
 	
+	init_sprites();
+	
+	PPU.vram.address = 0x20;
+	PPU.vram.address = 0x00;
+	
 	PPU.control = 0b10001000;
 	PPU.mask = 0b00011110;
 	
 	for(;;) {
+		waitvsync();
+		/* Update DMA */
+		__asm__("nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\n");
+		*(byte_t*)(0x2003) = 0x00;
+		*(byte_t*)(0x4014) = 0x20;
 	}
 }

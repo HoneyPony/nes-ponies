@@ -11,12 +11,29 @@
 	.importzp	tmp1, tmp2, tmp3, tmp4, ptr1, ptr2, ptr3, ptr4
 	.macpack	longbranch
 	.forceimport	__STARTUP__
+	.import		_waitvsync
+	.import		_sprite_ram
+	.export		_collision_bitmap
+	.export		_cbit_ptr
+	.export		_cbit_shift
+	.export		_out_cb
+	.export		_set_cb
 	.export		_palette
 	.export		_map_0
 	.export		_set_nt
+	.export		_set_nt_cb
+	.export		_out_nt_cb
 	.export		_load_map
 	.export		_load_palettes
+	.export		_init_sprites
 	.export		_main
+
+.segment	"DATA"
+
+_cbit_ptr:
+	.byte	$00
+_cbit_shift:
+	.byte	$00
 
 .segment	"RODATA"
 
@@ -37,22 +54,22 @@ _palette:
 	.byte	$0F
 	.byte	$0F
 	.byte	$0F
-	.byte	$0F
-	.byte	$0F
-	.byte	$0F
-	.byte	$0F
-	.byte	$0F
-	.byte	$0F
-	.byte	$0F
-	.byte	$0F
-	.byte	$0F
-	.byte	$0F
-	.byte	$0F
-	.byte	$0F
-	.byte	$0F
-	.byte	$0F
-	.byte	$0F
-	.byte	$0F
+	.byte	$31
+	.byte	$30
+	.byte	$30
+	.byte	$30
+	.byte	$30
+	.byte	$30
+	.byte	$30
+	.byte	$30
+	.byte	$30
+	.byte	$30
+	.byte	$30
+	.byte	$30
+	.byte	$30
+	.byte	$30
+	.byte	$30
+	.byte	$30
 _map_0:
 	.byte	$01
 	.byte	$22
@@ -61,6 +78,126 @@ _map_0:
 	.byte	$16
 	.byte	$05
 	.byte	$00
+
+.segment	"BSS"
+
+_collision_bitmap:
+	.res	240,$00
+
+; ---------------------------------------------------------------
+; void __near__ out_cb (unsigned char)
+; ---------------------------------------------------------------
+
+.segment	"CODE"
+
+.proc	_out_cb: near
+
+.segment	"CODE"
+
+	jsr     pusha
+	lda     #<(_collision_bitmap)
+	ldx     #>(_collision_bitmap)
+	clc
+	adc     _cbit_ptr
+	bcc     L0008
+	inx
+L0008:	ldy     #$00
+	jsr     ldauidx
+	jsr     pusha
+	ldy     #$00
+	ldx     #$00
+	lda     (sp),y
+	ldx     #$00
+	and     #$03
+	jsr     pushax
+	ldx     #$00
+	lda     _cbit_shift
+	jsr     tosshlax
+	jsr     pushax
+	ldy     #$03
+	ldx     #$00
+	lda     (sp),y
+	jsr     pushax
+	ldx     #$00
+	lda     _cbit_shift
+	jsr     tosaslax
+	jsr     tosorax
+	ldx     #$00
+	ldy     #$00
+	sta     (sp),y
+	ldx     #$00
+	lda     _cbit_shift
+	sec
+	sbc     #$02
+	sta     _cbit_shift
+	ldx     #$00
+	lda     _cbit_shift
+	cmp     #$07
+	lda     #$00
+	ldx     #$00
+	rol     a
+	jeq     L0010
+	ldx     #$00
+	lda     #$06
+	sta     _cbit_shift
+	ldx     #$00
+	inc     _cbit_ptr
+	lda     _cbit_ptr
+L0010:	jsr     incsp2
+	rts
+
+.endproc
+
+; ---------------------------------------------------------------
+; void __near__ set_cb (unsigned char, unsigned char)
+; ---------------------------------------------------------------
+
+.segment	"CODE"
+
+.proc	_set_cb: near
+
+.segment	"CODE"
+
+	jsr     pusha
+	ldy     #$01
+	ldx     #$00
+	lda     (sp),y
+	jsr     asrax2
+	ldx     #$00
+	jsr     pusha
+	ldy     #$00
+	ldx     #$00
+	lda     (sp),y
+	jsr     pushax
+	ldy     #$03
+	ldx     #$00
+	lda     (sp),y
+	jsr     tosaddax
+	jsr     shlax3
+	ldx     #$00
+	sta     _cbit_ptr
+	ldy     #$02
+	ldx     #$00
+	lda     (sp),y
+	ldx     #$00
+	and     #$03
+	ldx     #$00
+	ldy     #$02
+	sta     (sp),y
+	ldx     #$00
+	lda     #$06
+	jsr     pushax
+	ldy     #$04
+	ldx     #$00
+	lda     (sp),y
+	jsr     aslax1
+	jsr     tossubax
+	ldx     #$00
+	sta     _cbit_shift
+	jsr     incsp3
+	rts
+
+.endproc
 
 ; ---------------------------------------------------------------
 ; void __near__ set_nt (unsigned char, unsigned char)
@@ -107,6 +244,57 @@ _map_0:
 .endproc
 
 ; ---------------------------------------------------------------
+; void __near__ set_nt_cb (unsigned char, unsigned char)
+; ---------------------------------------------------------------
+
+.segment	"CODE"
+
+.proc	_set_nt_cb: near
+
+.segment	"CODE"
+
+	jsr     pusha
+	ldy     #$01
+	lda     (sp),y
+	jsr     pusha
+	ldy     #$01
+	lda     (sp),y
+	jsr     _set_nt
+	ldy     #$01
+	lda     (sp),y
+	jsr     pusha
+	ldy     #$01
+	lda     (sp),y
+	jsr     _set_cb
+	jsr     incsp2
+	rts
+
+.endproc
+
+; ---------------------------------------------------------------
+; void __near__ out_nt_cb (unsigned char)
+; ---------------------------------------------------------------
+
+.segment	"CODE"
+
+.proc	_out_nt_cb: near
+
+.segment	"CODE"
+
+	jsr     pusha
+	ldy     #$00
+	ldx     #$00
+	lda     (sp),y
+	sta     $2007
+	ldy     #$00
+	lda     (sp),y
+	jsr     _out_cb
+	jsr     incsp1
+	rts
+
+.endproc
+
+; ---------------------------------------------------------------
 ; void __near__ load_map (__near__ const unsigned char *)
 ; ---------------------------------------------------------------
 
@@ -116,7 +304,7 @@ _map_0:
 
 .segment	"RODATA"
 
-L0064:
+L008F:
 	.word	$0000
 
 .segment	"CODE"
@@ -141,25 +329,25 @@ L0064:
 	lda     #$00
 	ldy     #$02
 	sta     (sp),y
-L0041:	ldy     #$02
+L006C:	ldy     #$02
 	ldx     #$00
 	lda     (sp),y
 	cmp     #$04
 	jsr     boolult
-	jne     L0044
-	jmp     L0042
-L0044:	ldx     #$00
+	jne     L006F
+	jmp     L006D
+L006F:	ldx     #$00
 	lda     #$00
 	ldy     #$03
 	sta     (sp),y
-L0049:	ldy     #$03
+L0074:	ldy     #$03
 	ldx     #$00
 	lda     (sp),y
 	cmp     #$F0
 	jsr     boolult
-	jne     L004C
-	jmp     L0043
-L004C:	ldx     #$00
+	jne     L0077
+	jmp     L006E
+L0077:	ldx     #$00
 	lda     #$FF
 	sta     $2007
 	ldy     #$03
@@ -168,21 +356,21 @@ L004C:	ldx     #$00
 	lda     #$01
 	adc     (sp),y
 	sta     (sp),y
-	jmp     L0049
-L0043:	ldy     #$02
+	jmp     L0074
+L006E:	ldy     #$02
 	ldx     #$00
 	clc
 	lda     #$01
 	adc     (sp),y
 	sta     (sp),y
-	jmp     L0041
-L0042:	ldx     #$00
+	jmp     L006C
+L006D:	ldx     #$00
 	lda     #$00
 	ldy     #$03
 	sta     (sp),y
-L0058:	jmp     L005B
-L005A:	jmp     L0058
-L005B:	ldy     #$05
+L0083:	jmp     L0086
+L0085:	jmp     L0083
+L0086:	ldy     #$05
 	jsr     ldaxysp
 	jsr     pushax
 	ldy     #$05
@@ -191,25 +379,25 @@ L005B:	ldy     #$05
 	jsr     tosaddax
 	ldy     #$00
 	jsr     ldauidx
-	jmp     L005E
-L005E:	cmp     #$00
-	jeq     L0060
+	jmp     L0089
+L0089:	cmp     #$00
+	jeq     L008B
 	cmp     #$01
-	jeq     L0066
+	jeq     L0091
 	cmp     #$02
-	jeq     L00C3
-	jmp     L0060
-L0060:	pha
-	lda     L0064
+	jeq     L00CA
+	jmp     L008B
+L008B:	pha
+	lda     L008F
 	clc
 	adc     sp
 	sta     sp
-	lda     L0064+1
+	lda     L008F+1
 	adc     sp+1
 	sta     sp+1
 	pla
-	jmp     L0059
-L0066:	ldy     #$05
+	jmp     L0084
+L0091:	ldy     #$05
 	jsr     ldaxysp
 	jsr     pushax
 	ldy     #$05
@@ -249,13 +437,11 @@ L0066:	ldy     #$05
 	lda     (sp),y
 	jsr     aslax1
 	ldx     #$00
-	jsr     _set_nt
-	ldx     #$00
+	jsr     _set_nt_cb
 	lda     #$00
-	sta     $2007
-	ldx     #$00
+	jsr     _out_nt_cb
 	lda     #$04
-	sta     $2007
+	jsr     _out_nt_cb
 	ldy     #$05
 	jsr     ldaxysp
 	jsr     pushax
@@ -270,28 +456,24 @@ L0066:	ldy     #$05
 	jsr     ldauidx
 	ldy     #$00
 	sta     (sp),y
-	jmp     L0080
-L007E:	ldx     #$00
+	jmp     L00A5
+L00A3:	lda     #$04
+	jsr     _out_nt_cb
 	lda     #$04
-	sta     $2007
-	ldx     #$00
-	lda     #$04
-	sta     $2007
+	jsr     _out_nt_cb
 	ldy     #$00
 	ldx     #$00
 	lda     (sp),y
 	sec
 	sbc     #$01
 	sta     (sp),y
-L0080:	ldy     #$00
+L00A5:	ldy     #$00
 	lda     (sp),y
-	jne     L007E
-	ldx     #$00
+	jne     L00A3
 	lda     #$04
-	sta     $2007
-	ldx     #$00
+	jsr     _out_nt_cb
 	lda     #$01
-	sta     $2007
+	jsr     _out_nt_cb
 	ldy     #$02
 	ldx     #$00
 	lda     (sp),y
@@ -304,13 +486,11 @@ L0080:	ldy     #$00
 	jsr     aslax1
 	jsr     incax1
 	ldx     #$00
-	jsr     _set_nt
-	ldx     #$00
+	jsr     _set_nt_cb
 	lda     #$02
-	sta     $2007
-	ldx     #$00
+	jsr     _out_nt_cb
 	lda     #$05
-	sta     $2007
+	jsr     _out_nt_cb
 	ldy     #$05
 	jsr     ldaxysp
 	jsr     pushax
@@ -322,35 +502,31 @@ L0080:	ldy     #$00
 	jsr     ldauidx
 	ldy     #$00
 	sta     (sp),y
-	jmp     L00AA
-L00A8:	ldx     #$00
+	jmp     L00BD
+L00BB:	lda     #$05
+	jsr     _out_nt_cb
 	lda     #$05
-	sta     $2007
-	ldx     #$00
-	lda     #$05
-	sta     $2007
+	jsr     _out_nt_cb
 	ldy     #$00
 	ldx     #$00
 	lda     (sp),y
 	sec
 	sbc     #$01
 	sta     (sp),y
-L00AA:	ldy     #$00
+L00BD:	ldy     #$00
 	lda     (sp),y
-	jne     L00A8
-	ldx     #$00
+	jne     L00BB
 	lda     #$05
-	sta     $2007
-	ldx     #$00
+	jsr     _out_nt_cb
 	lda     #$03
-	sta     $2007
+	jsr     _out_nt_cb
 	ldy     #$03
 	ldx     #$00
 	clc
 	lda     #$01
 	adc     (sp),y
 	sta     (sp),y
-L00C3:	ldy     #$05
+L00CA:	ldy     #$05
 	jsr     ldaxysp
 	jsr     pushax
 	ldy     #$05
@@ -390,7 +566,7 @@ L00C3:	ldy     #$05
 	lda     (sp),y
 	jsr     aslax1
 	ldx     #$00
-	jsr     _set_nt
+	jsr     _set_nt_cb
 	ldx     #$00
 	lda     #$00
 	sta     $2007
@@ -428,13 +604,11 @@ L00C3:	ldy     #$05
 	jsr     shlax1
 	jsr     incax1
 	ldx     #$00
-	jsr     _set_nt
-	ldx     #$00
+	jsr     _set_nt_cb
 	lda     #$06
-	sta     $2007
-	ldx     #$00
+	jsr     _out_nt_cb
 	lda     #$07
-	sta     $2007
+	jsr     _out_nt_cb
 	ldy     #$02
 	ldx     #$00
 	lda     (sp),y
@@ -452,15 +626,13 @@ L00C3:	ldy     #$05
 	jsr     shlax1
 	jsr     incax2
 	ldx     #$00
-	jsr     _set_nt
-	ldx     #$00
+	jsr     _set_nt_cb
 	lda     #$02
-	sta     $2007
-	ldx     #$00
+	jsr     _out_nt_cb
 	lda     #$03
-	sta     $2007
-	jmp     L00FB
-L00F9:	ldy     #$02
+	jsr     _out_nt_cb
+	jmp     L00F6
+L00F4:	ldy     #$02
 	ldx     #$00
 	lda     (sp),y
 	jsr     aslax1
@@ -476,13 +648,11 @@ L00F9:	ldy     #$02
 	jsr     tosaddax
 	jsr     shlax1
 	ldx     #$00
-	jsr     _set_nt
-	ldx     #$00
+	jsr     _set_nt_cb
 	lda     #$06
-	sta     $2007
-	ldx     #$00
+	jsr     _out_nt_cb
 	lda     #$07
-	sta     $2007
+	jsr     _out_nt_cb
 	ldy     #$02
 	ldx     #$00
 	lda     (sp),y
@@ -500,31 +670,29 @@ L00F9:	ldy     #$02
 	jsr     shlax1
 	jsr     decax1
 	ldx     #$00
-	jsr     _set_nt
-	ldx     #$00
+	jsr     _set_nt_cb
 	lda     #$06
-	sta     $2007
-	ldx     #$00
+	jsr     _out_nt_cb
 	lda     #$07
-	sta     $2007
+	jsr     _out_nt_cb
 	ldy     #$00
 	ldx     #$00
 	lda     (sp),y
 	sec
 	sbc     #$01
 	sta     (sp),y
-L00FB:	ldy     #$00
+L00F6:	ldy     #$00
 	lda     (sp),y
-	jne     L00F9
+	jne     L00F4
 	ldy     #$03
 	ldx     #$00
 	clc
 	lda     #$01
 	adc     (sp),y
 	sta     (sp),y
-	jmp     L005F
-L005F:	jmp     L005A
-L0059:	ldx     #$00
+	jmp     L008A
+L008A:	jmp     L0085
+L0084:	ldx     #$00
 	lda     #$88
 	sta     $2000
 	ldx     #$00
@@ -558,14 +726,14 @@ L0059:	ldx     #$00
 	lda     #$00
 	ldy     #$00
 	sta     (sp),y
-L012E:	ldy     #$00
+L011D:	ldy     #$00
 	ldx     #$00
 	lda     (sp),y
 	cmp     #$20
 	jsr     boolult
-	jne     L0131
-	jmp     L012F
-L0131:	ldy     #$02
+	jne     L0120
+	jmp     L011E
+L0120:	ldy     #$02
 	jsr     ldaxysp
 	jsr     pushax
 	ldy     #$02
@@ -581,8 +749,53 @@ L0131:	ldy     #$02
 	lda     #$01
 	adc     (sp),y
 	sta     (sp),y
-	jmp     L012E
-L012F:	jsr     incsp3
+	jmp     L011D
+L011E:	jsr     incsp3
+	rts
+
+.endproc
+
+; ---------------------------------------------------------------
+; void __near__ init_sprites (void)
+; ---------------------------------------------------------------
+
+.segment	"CODE"
+
+.proc	_init_sprites: near
+
+.segment	"CODE"
+
+	lda     #$00
+	jsr     pusha
+L012B:	jmp     L012E
+L012D:	jmp     L012B
+L012E:	lda     _sprite_ram
+	ldx     _sprite_ram+1
+	jsr     pushax
+	ldy     #$02
+	ldx     #$00
+	lda     (sp),y
+	jsr     tosaddax
+	jsr     pushax
+	ldx     #$00
+	lda     #$FF
+	ldy     #$00
+	jsr     staspidx
+	ldy     #$00
+	ldx     #$00
+	clc
+	lda     #$01
+	adc     (sp),y
+	sta     (sp),y
+	ldy     #$00
+	ldx     #$00
+	lda     (sp),y
+	cmp     #$00
+	jsr     booleq
+	jeq     L0133
+	jmp     L012C
+L0133:	jmp     L012D
+L012C:	jsr     incsp1
 	rts
 
 .endproc
@@ -609,15 +822,48 @@ L012F:	jsr     incsp3
 	lda     #<(_map_0)
 	ldx     #>(_map_0)
 	jsr     _load_map
+	jsr     _init_sprites
+	ldx     #$00
+	lda     #$20
+	sta     $2006
+	ldx     #$00
+	lda     #$00
+	sta     $2006
 	ldx     #$00
 	lda     #$88
 	sta     $2000
 	ldx     #$00
 	lda     #$1E
 	sta     $2001
-L014B:	jmp     L014E
-L014D:	jmp     L014B
-L014E:	jmp     L014D
+L014D:	jmp     L0150
+L014F:	jmp     L014D
+L0150:	jsr     _waitvsync
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	ldx     #$00
+	lda     #$00
+	sta     $2003
+	ldx     #$00
+	lda     #$20
+	sta     $4014
+	jmp     L014F
 	rts
 
 .endproc
