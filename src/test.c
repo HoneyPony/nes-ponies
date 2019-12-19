@@ -60,8 +60,14 @@ const byte_t palette[] = {
 };
 
 const byte_t map_0[] = {
-	//0x01, 0b00100010, 5,
-	//0x02, 0b00010110, 5,
+	0x01, 0b00100010, 5,
+	0x02, 0b00010110, 5,
+	0x01, 0b01100010, 5,
+	0x02, 0b00010110, 5,
+	0x01, 0b11100010, 5,
+	0x02, 0b00010110, 5,
+	0x01, 0b10100010, 5,
+	0x02, 0b00010110, 5,
 	0x00
 };
 
@@ -88,8 +94,8 @@ void load_map(const byte_t *map) {
 	byte_t y;
 	byte_t len;
 	
-	PPU.control = 0;
-	PPU.mask = 0;
+	//PPU.control = 0;
+	//PPU.mask = 0;
 	
 	PPU.vram.address = 0x20;
 	PPU.vram.address = 0x00;
@@ -175,9 +181,9 @@ void load_map(const byte_t *map) {
 		}
 	}
 	
-done_loading_map:
-	PPU.control = 0b10001000;
-	PPU.mask = 0b00011110;
+done_loading_map: {}
+	//PPU.control = 0b10001000;
+	//PPU.mask = 0b00011110;
 }
 
 void load_palettes(const byte_t *palettes) {
