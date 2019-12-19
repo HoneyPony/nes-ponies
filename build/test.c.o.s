@@ -11,7 +11,6 @@
 	.importzp	tmp1, tmp2, tmp3, tmp4, ptr1, ptr2, ptr3, ptr4
 	.macpack	longbranch
 	.forceimport	__STARTUP__
-	.import		_waitvsync
 	.import		_sprite_ram
 	.export		_collision_bitmap
 	.export		_cbit_ptr
@@ -837,7 +836,7 @@ L012C:	jsr     incsp1
 	sta     $2001
 L014D:	jmp     L0150
 L014F:	jmp     L014D
-L0150:	jsr     _waitvsync
+L0150:	nop
 	nop
 	nop
 	nop
@@ -856,13 +855,6 @@ L0150:	jsr     _waitvsync
 	nop
 	nop
 	nop
-	nop
-	ldx     #$00
-	lda     #$00
-	sta     $2003
-	ldx     #$00
-	lda     #$20
-	sta     $4014
 	jmp     L014F
 	rts
 

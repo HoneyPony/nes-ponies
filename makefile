@@ -6,10 +6,11 @@ SRC_DIR = ./src
 SRCS=\
 test.c\
 graphics.s\
+nmi.s\
 sprite_ram.s
 
 $(BIN): $(SRCS:%=$(BUILD_DIR)/%.o)
-	ld65 $^ -C nes.cfg -o $(BIN) --lib nes.lib
+	ld65 $^ -C nes.cfg -o $(BIN) --lib smallnes.lib
 
 $(BUILD_DIR)/%.s.o : $(SRC_DIR)/%.s
 	mkdir -p $(BUILD_DIR)

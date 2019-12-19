@@ -221,10 +221,10 @@ void main(void) {
 	PPU.mask = 0b00011110;
 	
 	for(;;) {
-		waitvsync();
+		//waitvsync();
 		/* Update DMA */
 		__asm__("nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\n");
-		*(byte_t*)(0x2003) = 0x00;
-		*(byte_t*)(0x4014) = 0x20;
+		//*(byte_t*)(0x2003) = 0x00;
+		//*(byte_t*)(0x4014) = 0x20;
 	}
 }
