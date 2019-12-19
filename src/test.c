@@ -60,8 +60,8 @@ const byte_t palette[] = {
 };
 
 const byte_t map_0[] = {
-	0x01, 0b00100010, 5,
-	0x02, 0b00010110, 5,
+	//0x01, 0b00100010, 5,
+	//0x02, 0b00010110, 5,
 	0x00
 };
 
@@ -205,7 +205,6 @@ void init_sprites() {
 
 void main(void) {
 	
-	
 	PPU.control = 0;
 	PPU.mask = 0;
 	
@@ -221,10 +220,6 @@ void main(void) {
 	PPU.mask = 0b00011110;
 	
 	for(;;) {
-		//waitvsync();
-		/* Update DMA */
-		__asm__("nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\n");
-		//*(byte_t*)(0x2003) = 0x00;
-		//*(byte_t*)(0x4014) = 0x20;
+
 	}
 }

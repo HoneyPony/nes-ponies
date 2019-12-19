@@ -70,12 +70,6 @@ _palette:
 	.byte	$30
 	.byte	$30
 _map_0:
-	.byte	$01
-	.byte	$22
-	.byte	$05
-	.byte	$02
-	.byte	$16
-	.byte	$05
 	.byte	$00
 
 .segment	"BSS"
@@ -303,7 +297,7 @@ L0010:	jsr     incsp2
 
 .segment	"RODATA"
 
-L008F:
+L0089:
 	.word	$0000
 
 .segment	"CODE"
@@ -328,25 +322,25 @@ L008F:
 	lda     #$00
 	ldy     #$02
 	sta     (sp),y
-L006C:	ldy     #$02
+L0066:	ldy     #$02
 	ldx     #$00
 	lda     (sp),y
 	cmp     #$04
 	jsr     boolult
-	jne     L006F
-	jmp     L006D
-L006F:	ldx     #$00
+	jne     L0069
+	jmp     L0067
+L0069:	ldx     #$00
 	lda     #$00
 	ldy     #$03
 	sta     (sp),y
-L0074:	ldy     #$03
+L006E:	ldy     #$03
 	ldx     #$00
 	lda     (sp),y
 	cmp     #$F0
 	jsr     boolult
-	jne     L0077
-	jmp     L006E
-L0077:	ldx     #$00
+	jne     L0071
+	jmp     L0068
+L0071:	ldx     #$00
 	lda     #$FF
 	sta     $2007
 	ldy     #$03
@@ -355,21 +349,21 @@ L0077:	ldx     #$00
 	lda     #$01
 	adc     (sp),y
 	sta     (sp),y
-	jmp     L0074
-L006E:	ldy     #$02
+	jmp     L006E
+L0068:	ldy     #$02
 	ldx     #$00
 	clc
 	lda     #$01
 	adc     (sp),y
 	sta     (sp),y
-	jmp     L006C
-L006D:	ldx     #$00
+	jmp     L0066
+L0067:	ldx     #$00
 	lda     #$00
 	ldy     #$03
 	sta     (sp),y
-L0083:	jmp     L0086
-L0085:	jmp     L0083
-L0086:	ldy     #$05
+L007D:	jmp     L0080
+L007F:	jmp     L007D
+L0080:	ldy     #$05
 	jsr     ldaxysp
 	jsr     pushax
 	ldy     #$05
@@ -378,25 +372,25 @@ L0086:	ldy     #$05
 	jsr     tosaddax
 	ldy     #$00
 	jsr     ldauidx
-	jmp     L0089
-L0089:	cmp     #$00
-	jeq     L008B
+	jmp     L0083
+L0083:	cmp     #$00
+	jeq     L0085
 	cmp     #$01
-	jeq     L0091
+	jeq     L008B
 	cmp     #$02
-	jeq     L00CA
-	jmp     L008B
-L008B:	pha
-	lda     L008F
+	jeq     L00C4
+	jmp     L0085
+L0085:	pha
+	lda     L0089
 	clc
 	adc     sp
 	sta     sp
-	lda     L008F+1
+	lda     L0089+1
 	adc     sp+1
 	sta     sp+1
 	pla
-	jmp     L0084
-L0091:	ldy     #$05
+	jmp     L007E
+L008B:	ldy     #$05
 	jsr     ldaxysp
 	jsr     pushax
 	ldy     #$05
@@ -455,8 +449,8 @@ L0091:	ldy     #$05
 	jsr     ldauidx
 	ldy     #$00
 	sta     (sp),y
-	jmp     L00A5
-L00A3:	lda     #$04
+	jmp     L009F
+L009D:	lda     #$04
 	jsr     _out_nt_cb
 	lda     #$04
 	jsr     _out_nt_cb
@@ -466,9 +460,9 @@ L00A3:	lda     #$04
 	sec
 	sbc     #$01
 	sta     (sp),y
-L00A5:	ldy     #$00
+L009F:	ldy     #$00
 	lda     (sp),y
-	jne     L00A3
+	jne     L009D
 	lda     #$04
 	jsr     _out_nt_cb
 	lda     #$01
@@ -501,8 +495,8 @@ L00A5:	ldy     #$00
 	jsr     ldauidx
 	ldy     #$00
 	sta     (sp),y
-	jmp     L00BD
-L00BB:	lda     #$05
+	jmp     L00B7
+L00B5:	lda     #$05
 	jsr     _out_nt_cb
 	lda     #$05
 	jsr     _out_nt_cb
@@ -512,9 +506,9 @@ L00BB:	lda     #$05
 	sec
 	sbc     #$01
 	sta     (sp),y
-L00BD:	ldy     #$00
+L00B7:	ldy     #$00
 	lda     (sp),y
-	jne     L00BB
+	jne     L00B5
 	lda     #$05
 	jsr     _out_nt_cb
 	lda     #$03
@@ -525,7 +519,7 @@ L00BD:	ldy     #$00
 	lda     #$01
 	adc     (sp),y
 	sta     (sp),y
-L00CA:	ldy     #$05
+L00C4:	ldy     #$05
 	jsr     ldaxysp
 	jsr     pushax
 	ldy     #$05
@@ -630,8 +624,8 @@ L00CA:	ldy     #$05
 	jsr     _out_nt_cb
 	lda     #$03
 	jsr     _out_nt_cb
-	jmp     L00F6
-L00F4:	ldy     #$02
+	jmp     L00F0
+L00EE:	ldy     #$02
 	ldx     #$00
 	lda     (sp),y
 	jsr     aslax1
@@ -680,18 +674,18 @@ L00F4:	ldy     #$02
 	sec
 	sbc     #$01
 	sta     (sp),y
-L00F6:	ldy     #$00
+L00F0:	ldy     #$00
 	lda     (sp),y
-	jne     L00F4
+	jne     L00EE
 	ldy     #$03
 	ldx     #$00
 	clc
 	lda     #$01
 	adc     (sp),y
 	sta     (sp),y
-	jmp     L008A
-L008A:	jmp     L0085
-L0084:	ldx     #$00
+	jmp     L0084
+L0084:	jmp     L007F
+L007E:	ldx     #$00
 	lda     #$88
 	sta     $2000
 	ldx     #$00
@@ -725,14 +719,14 @@ L0084:	ldx     #$00
 	lda     #$00
 	ldy     #$00
 	sta     (sp),y
-L011D:	ldy     #$00
+L0117:	ldy     #$00
 	ldx     #$00
 	lda     (sp),y
 	cmp     #$20
 	jsr     boolult
-	jne     L0120
-	jmp     L011E
-L0120:	ldy     #$02
+	jne     L011A
+	jmp     L0118
+L011A:	ldy     #$02
 	jsr     ldaxysp
 	jsr     pushax
 	ldy     #$02
@@ -748,8 +742,8 @@ L0120:	ldy     #$02
 	lda     #$01
 	adc     (sp),y
 	sta     (sp),y
-	jmp     L011D
-L011E:	jsr     incsp3
+	jmp     L0117
+L0118:	jsr     incsp3
 	rts
 
 .endproc
@@ -766,9 +760,9 @@ L011E:	jsr     incsp3
 
 	lda     #$00
 	jsr     pusha
-L012B:	jmp     L012E
-L012D:	jmp     L012B
-L012E:	lda     _sprite_ram
+L0125:	jmp     L0128
+L0127:	jmp     L0125
+L0128:	lda     _sprite_ram
 	ldx     _sprite_ram+1
 	jsr     pushax
 	ldy     #$02
@@ -791,10 +785,10 @@ L012E:	lda     _sprite_ram
 	lda     (sp),y
 	cmp     #$00
 	jsr     booleq
-	jeq     L0133
-	jmp     L012C
-L0133:	jmp     L012D
-L012C:	jsr     incsp1
+	jeq     L012D
+	jmp     L0126
+L012D:	jmp     L0127
+L0126:	jsr     incsp1
 	rts
 
 .endproc
@@ -834,28 +828,9 @@ L012C:	jsr     incsp1
 	ldx     #$00
 	lda     #$1E
 	sta     $2001
-L014D:	jmp     L0150
-L014F:	jmp     L014D
-L0150:	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	jmp     L014F
+L0147:	jmp     L014A
+L0149:	jmp     L0147
+L014A:	jmp     L0149
 	rts
 
 .endproc
