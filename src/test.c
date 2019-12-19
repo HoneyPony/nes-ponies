@@ -1,6 +1,6 @@
 #include <nes.h>
 
-#define SYNC_PPU (void)(PPU.status)
+#define SYNC_PPU() /*(__asm__("lda $2002"))*/
 
 #define GR_TL 0x00
 #define GR_TR 0x01
@@ -60,20 +60,14 @@ const byte_t palette[] = {
 };
 
 const byte_t map_0[] = {
-	0x01, 0b00100010, 5,
-	0x02, 0b00010110, 5,
-	0x01, 0b01100010, 5,
-	0x02, 0b00010110, 5,
-	0x01, 0b11100010, 5,
-	0x02, 0b00010110, 5,
-	0x01, 0b10100010, 5,
-	0x02, 0b00010110, 5,
+	0x01, 0b11010000, 14,
 	0x00
 };
 
 void set_nt(byte_t x, byte_t y) {
 	unsigned short address;
 	address = x + ((unsigned short)y << 5) + 0x2000;
+	SYNC_PPU();
 	PPU.vram.address = address >> 8;
 	PPU.vram.address = address;
 }
@@ -191,6 +185,7 @@ void load_palettes(const byte_t *palettes) {
 	
 	(void)(PPU.status);
 	
+	SYNC_PPU();
 	PPU.vram.address = 0x3F;
 	PPU.vram.address = 0x00;
 	
@@ -209,6 +204,30 @@ void init_sprites() {
 	}
 }
 
+struct player_t {
+	unsigned short x;
+	unsigned short y;
+	short vx;
+	short vy;
+} player;
+
+byte_t player_sprite = 0x04;
+
+void player_tick() {
+	sprite_ram[player_sprite] = (player.y >> 8) - 1;
+	sprite_ram[player_sprite + 3] = (player.x >> 8);
+}
+
+void player_init() {
+	sprite_ram[player_sprite + 1] = 0;
+	sprite_ram[player_sprite + 2] = 0;
+	
+	player.x = 0x8A00;
+	player.y = 0xB500;
+	player.vx = 0;
+	player.vy = 0;
+}
+
 void main(void) {
 	
 	PPU.control = 0;
@@ -219,13 +238,16 @@ void main(void) {
 	
 	init_sprites();
 	
+	SYNC_PPU();
 	PPU.vram.address = 0x20;
 	PPU.vram.address = 0x00;
 	
 	PPU.control = 0b10001000;
 	PPU.mask = 0b00011110;
 	
+	player_init();
+	
 	for(;;) {
-
+		player_tick();
 	}
 }
