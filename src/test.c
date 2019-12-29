@@ -19,6 +19,8 @@ typedef unsigned char byte_t;
 
 extern byte_t *sprite_ram;
 
+extern void nothing();
+
 byte_t collision_bitmap[240];
 byte_t cbit_ptr = 0;
 byte_t cbit_shift = 0;
@@ -219,8 +221,10 @@ void player_tick() {
 }
 
 void player_init() {
+	sprite_ram[player_sprite] = 0x8A;
 	sprite_ram[player_sprite + 1] = 0;
 	sprite_ram[player_sprite + 2] = 0;
+	sprite_ram[player_sprite + 3] = 0xB5;
 	
 	player.x = 0x8A00;
 	player.y = 0xB500;
@@ -229,6 +233,7 @@ void player_init() {
 }
 
 void main(void) {
+	byte_t i;
 	
 	PPU.control = 0;
 	PPU.mask = 0;
@@ -247,7 +252,13 @@ void main(void) {
 	
 	player_init();
 	
+	for(i = 0;;) {
+		sprite_ram[i] = 0;
+		++i;
+		if(i == 0) break;
+	}
+	
 	for(;;) {
-		player_tick();
+		//player_tick();
 	}
 }
