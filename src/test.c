@@ -17,7 +17,7 @@
 
 typedef unsigned char byte_t;
 
-extern byte_t *sprite_ram;
+volatile extern byte_t sprite_ram[256];
 
 extern void nothing();
 
@@ -251,12 +251,6 @@ void main(void) {
 	PPU.mask = 0b00011110;
 	
 	player_init();
-	
-	for(i = 0;;) {
-		sprite_ram[i] = 0;
-		++i;
-		if(i == 0) break;
-	}
 	
 	for(;;) {
 		//player_tick();
