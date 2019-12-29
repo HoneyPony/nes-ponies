@@ -1,5 +1,4 @@
 .export _sprite_ram
 
-.segment "DATA"
-.org $200
+.segment "SPRITE_BSS"
 _sprite_ram: .res 256
