@@ -19,7 +19,17 @@ typedef unsigned char byte_t;
 
 volatile extern byte_t sprite_ram[256];
 
-extern void nothing();
+extern void read_controller();
+extern byte_t controller;
+
+#define J_RIGHT  (controller & 0x01)
+#define J_LEFT   (controller & 0x02)
+#define J_DOWN   (controller & 0x04)
+#define J_UP     (controller & 0x08)
+#define J_START  (controller & 0x10)
+#define J_SELECT (controller & 0x20)
+#define J_B      (controller & 0x40)
+#define J_A      (controller & 0x80)
 
 byte_t collision_bitmap[240];
 byte_t cbit_ptr = 0;
@@ -215,9 +225,29 @@ struct player_t {
 
 byte_t player_sprite = 0x04;
 
-void player_tick() {
-	sprite_ram[player_sprite] = (player.y >> 8) - 1;
-	sprite_ram[player_sprite + 3] = (player.x >> 8);
+void player_tick() {	
+	if(J_LEFT) player.vx = -1;
+	else if(J_RIGHT) player.vx = 1;
+	else player.vx = 0;
+	
+	player.x += player.vx;
+
+	{
+		byte_t y = (player.y >> 8) - 1;
+		byte_t x = (player.x >> 8);
+		
+		sprite_ram[player_sprite] = y;
+		sprite_ram[player_sprite + 3] = x;
+		
+		sprite_ram[player_sprite + 4] = y + 8;
+		sprite_ram[player_sprite + 7] = x;
+		
+		sprite_ram[player_sprite + 8] = y;
+		sprite_ram[player_sprite + 11] = x + 8;
+		
+		sprite_ram[player_sprite + 12] = y + 8;
+		sprite_ram[player_sprite + 15] = x + 8;
+	}
 }
 
 void player_init() {
@@ -226,9 +256,24 @@ void player_init() {
 	sprite_ram[player_sprite + 2] = 0;
 	sprite_ram[player_sprite + 3] = 0xB5;
 	
+	sprite_ram[player_sprite + 4] = 0x8A;
+	sprite_ram[player_sprite + 5] = 1;
+	sprite_ram[player_sprite + 6] = 0;
+	sprite_ram[player_sprite + 7] = 0xB5;
+	
+	sprite_ram[player_sprite + 8] = 0x8A;
+	sprite_ram[player_sprite + 9] = 2;
+	sprite_ram[player_sprite + 10] = 0;
+	sprite_ram[player_sprite + 11] = 0xB5;
+	
+	sprite_ram[player_sprite + 12] = 0x8A;
+	sprite_ram[player_sprite + 13] = 3;
+	sprite_ram[player_sprite + 14] = 0;
+	sprite_ram[player_sprite + 15] = 0xB5;
+	
 	player.x = 0x8A00;
 	player.y = 0xB500;
-	player.vx = 0;
+	player.vx = 1;
 	player.vy = 0;
 }
 
@@ -253,6 +298,7 @@ void main(void) {
 	player_init();
 	
 	for(;;) {
-		//player_tick();
+		read_controller();
+		player_tick();
 	}
 }

@@ -7,7 +7,10 @@ SRCS=\
 test.c\
 graphics.s\
 nmi.s\
-sprite_ram.s
+sprite_ram.s\
+poll_input.s
+
+
 
 $(BIN): $(SRCS:%=$(BUILD_DIR)/%.o)
 	ld65 $^ -C nes.cfg -o $(BIN) --lib smallnes.lib
