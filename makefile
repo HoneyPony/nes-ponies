@@ -4,7 +4,10 @@ BUILD_DIR= ./build
 SRC_DIR = ./src
 
 SRCS=\
-test.c\
+main.c\
+map.c\
+palette.c\
+player.c\
 graphics.s\
 nmi.s\
 sprite_ram.s\
