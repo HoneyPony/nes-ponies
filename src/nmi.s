@@ -1,3 +1,8 @@
+.export _cycle_flag
+
+.segment "BSS"
+_cycle_flag: .res 1
+
 .segment "CODE"
 
 nmi_handler:
@@ -23,7 +28,7 @@ nmi_handler:
 	lda #$02
 	sta $4014
 	
-	; inc cycle_flag
+	inc _cycle_flag
 	
 	pla
 	tax

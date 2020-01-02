@@ -30,6 +30,7 @@ const byte_t map_0[] = {
 };
 
 extern void read_controller();
+extern byte_t cycle_flag;
 
 void main(void) {
 	PPU.control = 0;
@@ -49,7 +50,10 @@ void main(void) {
 	player_init();
 	
 	for(;;) {
-		read_controller();
-		player_tick();
+		if(cycle_flag) {
+			cycle_flag = 0;
+			read_controller();
+			player_tick();
+		}
 	}
 }

@@ -10,8 +10,8 @@ struct player_t {
 byte_t player_sprite = 0x04;
 
 void player_tick() {	
-	if(J_LEFT) player.vx = -1;
-	else if(J_RIGHT) player.vx = 1;
+	if(J_LEFT) player.vx = -10;
+	else if(J_RIGHT) player.vx = 10;
 	else player.vx = 0;
 	
 	player.x += player.vx;
