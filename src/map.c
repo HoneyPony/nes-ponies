@@ -21,7 +21,8 @@ byte_t cbit_shift = 0;
 
 void out_cb(byte_t k) {
 	byte_t r = collision_bitmap[cbit_ptr];
-	r = ((r & 0x3) << cbit_shift) | (k << cbit_shift);
+	r = (r & ~(0x3 << cbit_shift)) | (k << cbit_shift);
+	collision_bitmap[cbit_ptr] = r;
 	cbit_shift -= 2;
 	if(cbit_shift > 6) {
 		cbit_shift = 6;
@@ -31,7 +32,7 @@ void out_cb(byte_t k) {
 
 void set_cb(byte_t x, byte_t y) {
 	byte_t x_cel = x >> 2;
-	cbit_ptr = x_cel + y << 3;
+	cbit_ptr = x_cel + (y << 3);
 	/* Given x from 0 to 4, our shift should be:
 	 * x == 0 -> 6
 	 * x == 1 -> 4
@@ -41,6 +42,17 @@ void set_cb(byte_t x, byte_t y) {
 	 */
 	x = x & 0x3;
 	cbit_shift = 6 - (x << 1);
+}
+
+byte_t map_kind(byte_t x, byte_t y) {
+	byte_t x_cel, ptr, shift;
+	
+	x_cel = x >> 2;
+	ptr = x_cel + (y << 3);
+	x = x & 0x3;
+	shift = 6 - (x << 1);
+	
+	return (collision_bitmap[ptr] >> shift) & 0x03;
 }
 
 void set_nt(byte_t x, byte_t y) {
@@ -58,7 +70,7 @@ void set_nt_cb(byte_t x, byte_t y) {
 
 void out_nt_cb(byte_t v) {
 	out_nt(v);
-	out_cb(v);
+	out_cb(1);
 }
 
 void load_map(const byte_t *map) {
@@ -69,9 +81,12 @@ void load_map(const byte_t *map) {
 	
 	PPU.vram.address = 0x20;
 	PPU.vram.address = 0x00;
+	cbit_ptr = 0;
+	cbit_shift = 0;
 	for(x = 0; x < 4; ++x) {
 		for(i = 0; i < 240; ++i) {
 			out_nt(SKY);
+			collision_bitmap[i] = 0x00;
 		}
 	}
 	
