@@ -6,6 +6,8 @@ struct player_t {
 	unsigned short y;
 	short vx;
 	short vy;
+	
+	byte_t air_frames;
 } player;
 
 byte_t player_sprite = 0x04;
@@ -83,6 +85,10 @@ void player_move_with_collisions() {
 	}
 	if(y_flag) {
 		player.y &= 0xFF00;
+		player.air_frames = 0;
+	}
+	else {
+		if(player.air_frames < 32) ++player.air_frames;
 	}
 	
 }
@@ -107,8 +113,9 @@ void player_tick() {
 	if(player.vx < -0x200) player.vx = -0x200;
 	
 	player.vy += 24;
-	if(J_A) {
-		player.vy -= 0x200;
+	if(player.air_frames < 4 && J_A) {
+		player.vy -= 0x400;
+		player.air_frames = 32;
 	}
 	
 	player_move_with_collisions();
@@ -164,4 +171,5 @@ void player_init() {
 	player.y = 0xB500;
 	player.vx = 1;
 	player.vy = 0;
+	player.air_frames = 0;
 }
