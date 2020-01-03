@@ -12,17 +12,11 @@ struct player_t {
 
 byte_t player_sprite = 0x04;
 
-byte_t player_colliding() {
-	byte_t x = (player.x) >> 11;
-	byte_t y = (player.y) >> 11;
-	
-	byte_t result = 0;
-	byte_t i, j;
-	for(i = 0; i <= 2; ++i) {
-		for(j = 0; j <= 2; ++j) {
-			result |= map_kind(x + i, y + j);
-		}
-	}
+byte_t player_colliding() {	
+	byte_t result = map_kind((player.x + 0x00) >> 11, (player.y + 0x00) >> 11) |
+			map_kind((player.x + 0xF00) >> 11, (player.y + 0x00) >> 11) |
+			map_kind((player.x + 0x00) >> 11, (player.y + 0xF00) >> 11) |
+			map_kind((player.x + 0xF00) >> 11, (player.y + 0xF00) >> 11);
 	return result;
 }
 
