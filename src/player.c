@@ -11,30 +11,110 @@ struct player_t {
 byte_t player_sprite = 0x04;
 
 byte_t player_colliding() {
-	byte_t x = (player.x + 4) >> 11;
-	byte_t y = (player.y + 4) >> 11;
+	byte_t x = (player.x) >> 11;
+	byte_t y = (player.y) >> 11;
 	
-	return map_kind(x, y) | map_kind(x + 1, y) | map_kind(x, y + 1) | map_kind(x + 1, y + 1);
+	byte_t result = 0;
+	byte_t i, j;
+	for(i = 0; i <= 2; ++i) {
+		for(j = 0; j <= 2; ++j) {
+			result |= map_kind(x + i, y + j);
+		}
+	}
+	return result;
+}
+
+void player_move_with_collisions() {
+	
+	short tvx = player.vx;
+	short tvy = player.vy;
+	
+	byte_t iterations = 1;
+	byte_t depth = 0;
+	
+	byte_t y_flag = 0;
+	byte_t x_flag = 0;
+	
+	for(;;) {
+		player.y += tvy;
+		
+		if(player_colliding()) {
+			y_flag = 1;
+			player.y -= tvy;
+			tvy = tvy >> 1;
+			
+			iterations <<= 1;
+		}
+		else {
+			--iterations;
+			if(iterations == 0) break;
+		}
+		
+		if(++depth == 2) break;
+	}
+	
+	depth = 0;
+	iterations = 1;
+	for(;;) {
+		player.x += tvx;
+		
+		if(player_colliding()) {
+			x_flag = 1;
+			player.x -= tvx;
+			tvx = tvx >> 1;
+			
+			iterations <<= 1;
+		}
+		else {
+			--iterations;
+			if(iterations == 0) break;
+		}
+		
+		if(++depth == 2) break;
+	}
+	
+	
+
+	player.vx = tvx;
+	player.vy = tvy;
+	
+	if(x_flag) {
+		player.x &= 0xFF00;
+	}
+	if(y_flag) {
+		player.y &= 0xFF00;
+	}
+	
 }
 
 void player_tick() {	
-	if(J_LEFT) player.vx = -0x0F0;
-	else if(J_RIGHT) player.vx = 0xF0;
-	else player.vx = 0;
-	
-	if(J_UP) player.vy = -0x0F0;
-	else if(J_DOWN) player.vy = 0xF0;
-	else player.vy = 0;
-	
-	player.x += player.vx;
-	player.y += player.vy;
-	
-	//player.vy += 3;
-	
-	if(player_colliding()) {
-		//player.y -= 0x200;
+	signed char ax = 0;
+	if(J_LEFT) {
+		ax = -16;
 	}
-
+	else if(J_RIGHT) {
+		ax = 16;
+	}
+	else {
+		ax = -8;
+		if(player.vx < 0) ax = 8;
+		
+		player.vx += ax;
+		if(player.vx < 15 && player.vx > -15) player.vx = 0;
+	}
+	player.vx += ax;
+	if(player.vx > 0x200) player.vx = 0x200;
+	if(player.vx < -0x200) player.vx = -0x200;
+	
+	player.vy += 24;
+	if(J_A) {
+		player.vy -= 0x200;
+	}
+	
+	player_move_with_collisions();
+	//player.x += player.vx;
+	//player.y += player.vy;
+	
 	{
 		byte_t y = (player.y >> 8) - 1;
 		byte_t x = (player.x >> 8);
