@@ -26,6 +26,8 @@ const byte_t game_palette[] = {
 
 const byte_t map_0[] = {
 	M_HLINE, 0b11010000, 14,
+	M_HLINE, 0b11000000, 12,
+	M_HLINE, 0b10110000, 10,
 	M_DONE
 };
 

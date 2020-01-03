@@ -168,7 +168,7 @@ void player_init() {
 	sprite_ram[player_sprite + 15] = 0xB5;
 	
 	player.x = 0x8A00;
-	player.y = 0xB500;
+	player.y = 0x0100;
 	player.vx = 1;
 	player.vy = 0;
 	player.air_frames = 0;
