@@ -24,71 +24,57 @@ byte_t player_colliding() {
 	return result;
 }
 
-void player_move_with_collisions() {
-	
-	short tvx = player.vx;
-	short tvy = player.vy;
-	
-	byte_t iterations = 1;
-	byte_t depth = 0;
-	
-	byte_t y_flag = 0;
-	byte_t x_flag = 0;
-	
-	for(;;) {
-		player.y += tvy;
-		
-		if(player_colliding()) {
-			y_flag = 1;
-			player.y -= tvy;
-			tvy = tvy >> 1;
-			
-			iterations <<= 1;
-		}
-		else {
-			--iterations;
-			if(iterations == 0) break;
-		}
-		
-		if(++depth == 2) break;
-	}
-	
-	depth = 0;
-	iterations = 1;
-	for(;;) {
-		player.x += tvx;
-		
-		if(player_colliding()) {
-			x_flag = 1;
-			player.x -= tvx;
-			tvx = tvx >> 1;
-			
-			iterations <<= 1;
-		}
-		else {
-			--iterations;
-			if(iterations == 0) break;
-		}
-		
-		if(++depth == 2) break;
-	}
-	
-	
+byte_t on_floor() {
+	return map_kind(player.x >> 11, (player.y + 0x1100) >> 11) |
+		map_kind((player.x + 0xF00) >> 11, (player.y + 0x1100) >> 11);
+}
 
-	player.vx = tvx;
-	player.vy = tvy;
+#define COL_LOOP(delta, cmp, axis)\
+for(;;){\
+	if(delta cmp v) {\
+		player.axis += v;\
+		if(player_colliding()) {\
+			player.axis -= v;\
+			player.v##axis = 0;\
+		}\
+		break;\
+	}\
+	else {\
+		player.axis += delta;\
+		if(player_colliding()) {\
+			player.axis -= delta;\
+			player.v##axis = v;\
+			break;\
+		}\
+		v -= 0x800;\
+	}\
+}\
+
+void player_move_with_collisions() {
+	short v;
 	
-	if(x_flag) {
-		player.x &= 0xFF00;
-	}
-	if(y_flag) {
-		player.y &= 0xFF00;
-		player.air_frames = 0;
+	if(player.vx > 0x1000) player.vx = 0x1000;
+	if(player.vx < -0x1000) player.vx = -0x1000;
+	if(player.vy > 0x1000) player.vy = 0x1000;
+	if(player.vy < -0x1000) player.vy = -0x1000;
+	
+	v = player.vx;
+	
+	if(v < 0) {
+		COL_LOOP(-0x800, <, x)
 	}
 	else {
-		if(player.air_frames < 32) ++player.air_frames;
+		COL_LOOP(0x800, >, x)
 	}
 	
+	v = player.vy;
+	
+	if(v < 0) {
+		COL_LOOP(-0x800, <, y)
+	}
+	else {
+		COL_LOOP(0x800, >, y)
+	}
 }
 
 void player_tick() {	
@@ -119,6 +105,12 @@ void player_tick() {
 	player_move_with_collisions();
 	//player.x += player.vx;
 	//player.y += player.vy;
+	if(on_floor()) {
+		player.air_frames = 0;
+	}
+	else {
+		if(player.air_frames < 32) ++player.air_frames;
+	}
 	
 	{
 		byte_t y = (player.y >> 8) - 1;
