@@ -10,6 +10,8 @@ struct player_t {
 	short vy;
 	
 	byte_t air_frames;
+	byte_t jump_frames;
+	unsigned short jump_amount;
 } player;
 
 #include "normal-vars.h"
@@ -97,16 +99,30 @@ void player_tick() {
 	if(player.vx < -0x200) player.vx = -0x200;
 	
 	player.vy += 24;
-	if(player.air_frames < 4 && J_A) {
-		player.vy -= 0x400;
-		player.air_frames = 32;
+	if(J_A) {
+		if(player.air_frames < 4 && player.jump_frames == 0) {
+			player.jump_frames = 30;
+			player.jump_amount = 0x100;
+			player.air_frames = 32;
+			player.vy = 0;
+		}
+		
+		if(player.jump_frames > 0) {
+			player.vy -= player.jump_amount;
+			--player.jump_frames;
+			player.jump_amount -= 10;
+		}
+	}
+	else {
+		player.jump_frames = 0;
 	}
 	
 	player_move_with_collisions();
 	//player.x += player.vx;
 	//player.y += player.vy;
-	if(on_floor()) {
+	if(on_floor() && player.jump_frames < 25) {
 		player.air_frames = 0;
+		player.jump_frames = 0;
 	}
 	else {
 		if(player.air_frames < 32) ++player.air_frames;
@@ -117,21 +133,22 @@ void player_tick() {
 		byte_t x = (player.x >> 8);
 		byte_t mx = player.x >> 11;
 		byte_t my = player.y >> 11;
+		byte_t f = on_floor();
 		
 		sprite_ram[player_sprite] = y;
-		sprite_ram[player_sprite + 2] = map_kind(mx, my);
+		sprite_ram[player_sprite + 2] = f;//map_kind(mx, my);
 		sprite_ram[player_sprite + 3] = x;
 		
 		sprite_ram[player_sprite + 4] = y + 8;
-		sprite_ram[player_sprite + 6] = map_kind(mx, my + 1);
+		sprite_ram[player_sprite + 6] = f;//map_kind(mx, my + 1);
 		sprite_ram[player_sprite + 7] = x;
 		
 		sprite_ram[player_sprite + 8] = y;
-		sprite_ram[player_sprite + 10] = map_kind(mx + 1, my);
+		sprite_ram[player_sprite + 10] = f;//map_kind(mx + 1, my);
 		sprite_ram[player_sprite + 11] = x + 8;
 		
 		sprite_ram[player_sprite + 12] = y + 8;
-		sprite_ram[player_sprite + 14] = map_kind(mx + 1, my + 1);
+		sprite_ram[player_sprite + 14] = f;//map_kind(mx + 1, my + 1);
 		sprite_ram[player_sprite + 15] = x + 8;
 	}
 }
