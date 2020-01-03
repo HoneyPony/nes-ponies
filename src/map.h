@@ -3,7 +3,7 @@
 
 #include "main.h"
 
-void load_map(const byte_t *map);
+void load_map(const byte_t * const map);
 byte_t map_kind(byte_t x, byte_t y);
 
 #define M_DONE  0x00

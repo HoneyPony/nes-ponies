@@ -73,14 +73,16 @@ void out_nt_cb(byte_t v) {
 	out_cb(1);
 }
 
-void load_map(const byte_t *map) {
+void load_map(const byte_t *const map) {
 	byte_t i = 0;
 	byte_t x;
 	byte_t y;
 	byte_t len;
 	
+	SYNC_PPU();
 	PPU.vram.address = 0x20;
 	PPU.vram.address = 0x00;
+	
 	cbit_ptr = 0;
 	cbit_shift = 0;
 	for(x = 0; x < 4; ++x) {
@@ -130,6 +132,7 @@ void load_map(const byte_t *map) {
 			out_nt_cb(GR_BR);
 			
 			++i;
+			break;
 		}
 		case M_VLINE: {
 			x = map[++i];
@@ -161,6 +164,7 @@ void load_map(const byte_t *map) {
 			}
 			
 			++i;
+			break;
 		}
 			
 		}

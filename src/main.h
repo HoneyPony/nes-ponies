@@ -18,7 +18,7 @@ struct __ppu {
 };
 #define PPU             (*(struct __ppu*)0x2000)
 
-#define SYNC_PPU()
+#define SYNC_PPU() __asm__("lda $2002")
 
 typedef unsigned char byte_t;
 
