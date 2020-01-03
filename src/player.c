@@ -1,6 +1,8 @@
 #include "main.h"
 #include "map.h"
 
+#include "zeropage-vars.h"
+
 struct player_t {
 	unsigned short x;
 	unsigned short y;
@@ -10,7 +12,9 @@ struct player_t {
 	byte_t air_frames;
 } player;
 
-byte_t player_sprite = 0x04;
+#include "normal-vars.h"
+
+byte_t player_sprite;
 
 byte_t player_colliding() {	
 	byte_t result = map_kind((player.x + 0x00) >> 11, (player.y + 0x00) >> 11) |
@@ -141,6 +145,8 @@ void player_tick() {
 }
 
 void player_init() {
+	player_sprite = 0x04;
+	
 	sprite_ram[player_sprite] = 0x8A;
 	sprite_ram[player_sprite + 1] = 0;
 	sprite_ram[player_sprite + 2] = 0;
