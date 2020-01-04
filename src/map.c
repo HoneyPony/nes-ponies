@@ -140,8 +140,8 @@ void load_map(const byte_t *const map) {
 			x = x & 0xF;
 			set_nt_cb(x << 1, y << 1);
 			
-			out_nt(GR_TL);
-			out_nt(GR_TR);
+			out_nt_cb(GR_TL);
+			out_nt_cb(GR_TR);
 			
 			len = map[++i];
 			
