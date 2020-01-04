@@ -11,6 +11,7 @@ struct player_t {
 	
 	byte_t air_frames;
 	byte_t jump_frames;
+	byte_t direction; /* 0 for normal (right), 1 for flipped */
 	unsigned short jump_amount;
 } player;
 
@@ -82,13 +83,64 @@ void player_move_with_collisions() {
 #define GRAVITY 32
 #define JUMP_CORRECTION 15
 
+void update_player_sprites() {
+	byte_t y = (player.y >> 8) - 1;
+	byte_t x1 = (player.x >> 8);
+	byte_t x2 = x1;
+	
+	/* Depending on whether we are facing backwards or not we want to change
+	 * which sprite is on the left of the pony and which sprite is on the
+	 * right. */
+	if(player.direction) {
+		x1 += 8;
+	}
+	else {
+		x2 += 8;
+	}
+	
+	sprite_ram[player_sprite] = y;
+	sprite_ram[player_sprite + 3] = x1;
+	
+	sprite_ram[player_sprite + 4] = y;
+	sprite_ram[player_sprite + 7] = x2;
+	
+	y += 8;
+	
+	sprite_ram[player_sprite + 8] = y;
+	sprite_ram[player_sprite + 11] = x1;
+	
+	sprite_ram[player_sprite + 12] = y;
+	sprite_ram[player_sprite + 15] = x2;
+	
+	y += 8;
+	
+	sprite_ram[player_sprite + 16] = y;
+	sprite_ram[player_sprite + 19] = x1;
+	
+	sprite_ram[player_sprite + 20] = y;
+	sprite_ram[player_sprite + 23] = x2;
+	
+	/* We need to flip all sprites if facing left; we're re-using x1 and
+	 * x2 for this purpose */
+	x1 = 0;
+	if(player.direction) {
+		x1 = 0b01000000;
+	}
+	
+	for(x2 = 2; x2 < 23; x2 += 4) {
+		sprite_ram[player_sprite + x2] = x1;
+	}
+}
+
+#define ACCELERATION 24
+
 void player_tick() {	
 	signed char ax = 0;
 	if(J_LEFT) {
-		ax = -16;
+		ax = -ACCELERATION;
 	}
 	else if(J_RIGHT) {
-		ax = 16;
+		ax = ACCELERATION;
 	}
 	else {
 		ax = -8;
@@ -100,6 +152,14 @@ void player_tick() {
 	player.vx += ax;
 	if(player.vx > 0x200) player.vx = 0x200;
 	if(player.vx < -0x200) player.vx = -0x200;
+	
+	/* Only update direction once we've reached a good threshold */
+	if(player.vx > 0x020) {
+		player.direction = 0;
+	}
+	else if(player.vx < -0x020) {
+		player.direction = 1;
+	}
 	
 	player.vy += GRAVITY;
 	if(J_A) {
@@ -133,37 +193,7 @@ void player_tick() {
 		if(player.air_frames < 32) ++player.air_frames;
 	}
 	
-	{
-		byte_t y = (player.y >> 8) - 1;
-		byte_t x = (player.x >> 8);
-		byte_t mx = player.x >> 11;
-		byte_t my = player.y >> 11;
-		byte_t f = on_floor();
-		
-		sprite_ram[player_sprite] = y;
-		//sprite_ram[player_sprite + 2] = f;//map_kind(mx, my);
-		sprite_ram[player_sprite + 3] = x;
-		
-		sprite_ram[player_sprite + 4] = y;
-		//sprite_ram[player_sprite + 6] = f;//map_kind(mx, my + 1);
-		sprite_ram[player_sprite + 7] = x + 8;
-		
-		sprite_ram[player_sprite + 8] = y + 8;
-		//sprite_ram[player_sprite + 10] = f;//map_kind(mx + 1, my);
-		sprite_ram[player_sprite + 11] = x;
-		
-		sprite_ram[player_sprite + 12] = y + 8;
-		//sprite_ram[player_sprite + 14] = f;//map_kind(mx + 1, my + 1);
-		sprite_ram[player_sprite + 15] = x + 8;
-		
-		sprite_ram[player_sprite + 16] = y + 16;
-		//sprite_ram[player_sprite + 18] = f;//map_kind(mx + 1, my);
-		sprite_ram[player_sprite + 19] = x;
-		
-		sprite_ram[player_sprite + 20] = y + 16;
-		//sprite_ram[player_sprite + 22] = f;//map_kind(mx + 1, my + 1);
-		sprite_ram[player_sprite + 23] = x + 8;
-	}
+	update_player_sprites();
 }
 
 void player_init() {
@@ -204,4 +234,5 @@ void player_init() {
 	player.vx = 1;
 	player.vy = 0;
 	player.air_frames = 0;
+	player.direction = 0;
 }
