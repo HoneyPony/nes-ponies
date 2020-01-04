@@ -21,14 +21,14 @@ byte_t player_sprite;
 byte_t player_colliding() {	
 	byte_t result = map_kind((player.x + 0x00) >> 11, (player.y + 0x00) >> 11) |
 			map_kind((player.x + 0xF00) >> 11, (player.y + 0x00) >> 11) |
-			map_kind((player.x + 0x00) >> 11, (player.y + 0xF00) >> 11) |
-			map_kind((player.x + 0xF00) >> 11, (player.y + 0xF00) >> 11);
+			map_kind((player.x + 0x00) >> 11, (player.y + 0x1700) >> 11) |
+			map_kind((player.x + 0xF00) >> 11, (player.y + 0x1700) >> 11);
 	return result;
 }
 
 byte_t on_floor() {
-	return map_kind(player.x >> 11, (player.y + 0x1100) >> 11) |
-		map_kind((player.x + 0xF00) >> 11, (player.y + 0x1100) >> 11);
+	return map_kind(player.x >> 11, (player.y + 0x1900) >> 11) |
+		map_kind((player.x + 0xF00) >> 11, (player.y + 0x1900) >> 11);
 }
 
 #define COL_LOOP(delta, cmp, axis)\
@@ -141,20 +141,28 @@ void player_tick() {
 		byte_t f = on_floor();
 		
 		sprite_ram[player_sprite] = y;
-		sprite_ram[player_sprite + 2] = f;//map_kind(mx, my);
+		//sprite_ram[player_sprite + 2] = f;//map_kind(mx, my);
 		sprite_ram[player_sprite + 3] = x;
 		
-		sprite_ram[player_sprite + 4] = y + 8;
-		sprite_ram[player_sprite + 6] = f;//map_kind(mx, my + 1);
-		sprite_ram[player_sprite + 7] = x;
+		sprite_ram[player_sprite + 4] = y;
+		//sprite_ram[player_sprite + 6] = f;//map_kind(mx, my + 1);
+		sprite_ram[player_sprite + 7] = x + 8;
 		
-		sprite_ram[player_sprite + 8] = y;
-		sprite_ram[player_sprite + 10] = f;//map_kind(mx + 1, my);
-		sprite_ram[player_sprite + 11] = x + 8;
+		sprite_ram[player_sprite + 8] = y + 8;
+		//sprite_ram[player_sprite + 10] = f;//map_kind(mx + 1, my);
+		sprite_ram[player_sprite + 11] = x;
 		
 		sprite_ram[player_sprite + 12] = y + 8;
-		sprite_ram[player_sprite + 14] = f;//map_kind(mx + 1, my + 1);
+		//sprite_ram[player_sprite + 14] = f;//map_kind(mx + 1, my + 1);
 		sprite_ram[player_sprite + 15] = x + 8;
+		
+		sprite_ram[player_sprite + 16] = y + 16;
+		//sprite_ram[player_sprite + 18] = f;//map_kind(mx + 1, my);
+		sprite_ram[player_sprite + 19] = x;
+		
+		sprite_ram[player_sprite + 20] = y + 16;
+		//sprite_ram[player_sprite + 22] = f;//map_kind(mx + 1, my + 1);
+		sprite_ram[player_sprite + 23] = x + 8;
 	}
 }
 
@@ -172,14 +180,24 @@ void player_init() {
 	sprite_ram[player_sprite + 7] = 0xB5;
 	
 	sprite_ram[player_sprite + 8] = 0x8A;
-	sprite_ram[player_sprite + 9] = 2;
+	sprite_ram[player_sprite + 9] = 16;
 	sprite_ram[player_sprite + 10] = 0;
 	sprite_ram[player_sprite + 11] = 0xB5;
 	
 	sprite_ram[player_sprite + 12] = 0x8A;
-	sprite_ram[player_sprite + 13] = 3;
+	sprite_ram[player_sprite + 13] = 17;
 	sprite_ram[player_sprite + 14] = 0;
 	sprite_ram[player_sprite + 15] = 0xB5;
+	
+	sprite_ram[player_sprite + 16] = 0x8A;
+	sprite_ram[player_sprite + 17] = 32;
+	sprite_ram[player_sprite + 18] = 0;
+	sprite_ram[player_sprite + 19] = 0xB5;
+	
+	sprite_ram[player_sprite + 20] = 0x8A;
+	sprite_ram[player_sprite + 21] = 33;
+	sprite_ram[player_sprite + 22] = 0;
+	sprite_ram[player_sprite + 23] = 0xB5;
 	
 	player.x = 0x8A00;
 	player.y = 0x0100;
