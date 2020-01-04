@@ -79,6 +79,9 @@ void player_move_with_collisions() {
 	}
 }
 
+#define GRAVITY 24
+#define JUMP_CORRECTION 0
+
 void player_tick() {	
 	signed char ax = 0;
 	if(J_LEFT) {
@@ -98,11 +101,11 @@ void player_tick() {
 	if(player.vx > 0x200) player.vx = 0x200;
 	if(player.vx < -0x200) player.vx = -0x200;
 	
-	player.vy += 24;
+	player.vy += GRAVITY;
 	if(J_A) {
 		if(player.air_frames < 4 && player.jump_frames == 0) {
-			player.jump_frames = 30;
-			player.jump_amount = 0x100;
+			player.jump_frames = 9;
+			player.jump_amount = 0xA0 + JUMP_CORRECTION;
 			player.air_frames = 32;
 			player.vy = 0;
 		}
@@ -110,7 +113,7 @@ void player_tick() {
 		if(player.jump_frames > 0) {
 			player.vy -= player.jump_amount;
 			--player.jump_frames;
-			player.jump_amount -= 15;
+			player.jump_amount -= 16;
 		}
 	}
 	else {
