@@ -79,8 +79,8 @@ void player_move_with_collisions() {
 	}
 }
 
-#define GRAVITY 24
-#define JUMP_CORRECTION 0
+#define GRAVITY 32
+#define JUMP_CORRECTION 15
 
 void player_tick() {	
 	signed char ax = 0;
