@@ -19,6 +19,8 @@ struct player_t {
 #include "normal-vars.h"
 
 byte_t player_sprite;
+byte_t player_hair_front;
+byte_t player_hair_back;
 
 byte_t player_colliding() {	
 	byte_t result = map_kind((player.x + 0x00) >> 11, (player.y + 0x00) >> 11) |
@@ -98,6 +100,35 @@ void player_move_with_collisions() {
 #define GRAVITY 32
 #define JUMP_CORRECTION 15
 
+void test_player_hair() {
+	byte_t y = (player.y >> 8) - 1;
+	byte_t x = (player.x >> 8);
+	
+	/* hair 0 */
+	sprite_ram[player_hair_front] = y + 2;
+	sprite_ram[player_hair_front + 3] = x + 8;
+	
+	/* hair 2 */
+	sprite_ram[player_hair_front + 4] = y + 6;
+	sprite_ram[player_hair_front + 7] = x + 5;
+	
+	/* hair 1 */
+	sprite_ram[player_hair_back] = y + 2;
+	sprite_ram[player_hair_back + 3] = x + 4;
+	
+	/* hair 3 */
+	sprite_ram[player_hair_back + 4] = y + 7;
+	sprite_ram[player_hair_back + 7] = x - 3;
+	
+	/* hair 4 */
+	sprite_ram[player_hair_back + 8] = y + 9;
+	sprite_ram[player_hair_back + 11] = x - 4;
+	
+	/* hair 5 */
+	sprite_ram[player_hair_back + 12] = y + 13;
+	sprite_ram[player_hair_back + 15] = x - 3;
+}
+
 void update_player_sprites() {
 	byte_t y = (player.y >> 8) - 1;
 	byte_t x1 = (player.x >> 8);
@@ -145,6 +176,8 @@ void update_player_sprites() {
 	for(x2 = 2; x2 < 23; x2 += 4) {
 		sprite_ram[player_sprite + x2] = x1;
 	}
+	
+	test_player_hair();
 }
 
 #define ACCELERATION 24
@@ -253,7 +286,20 @@ void player_tick() {
 }
 
 void player_init() {
-	player_sprite = 0x04;
+	
+	player_hair_front = 0x04;
+	player_sprite = player_hair_front + 0x08; /* two front hairs */
+	player_hair_back = player_sprite + 0x18; /* 6 main sprites */
+	
+	sprite_ram[player_hair_front] = 0xFF;
+	sprite_ram[player_hair_front + 1] = 48;
+	sprite_ram[player_hair_front + 2] = 1;
+	sprite_ram[player_hair_front + 3] = 0xFF;
+	
+	sprite_ram[player_hair_front + 4] = 0xFF;
+	sprite_ram[player_hair_front + 5] = 50;
+	sprite_ram[player_hair_front + 6] = 1;
+	sprite_ram[player_hair_front + 7] = 0xFF;
 	
 	sprite_ram[player_sprite] = 0x8A;
 	sprite_ram[player_sprite + 1] = 0;
@@ -284,6 +330,26 @@ void player_init() {
 	sprite_ram[player_sprite + 21] = 33;
 	sprite_ram[player_sprite + 22] = 0;
 	sprite_ram[player_sprite + 23] = 0xB5;
+	
+	sprite_ram[player_hair_back] = 0xFF;
+	sprite_ram[player_hair_back + 1] = 49;
+	sprite_ram[player_hair_back + 2] = 1;
+	sprite_ram[player_hair_back + 3] = 0xFF;
+	
+	sprite_ram[player_hair_back + 4] = 0xFF;
+	sprite_ram[player_hair_back + 5] = 51;
+	sprite_ram[player_hair_back + 6] = 1;
+	sprite_ram[player_hair_back + 7] = 0xFF;
+	
+	sprite_ram[player_hair_back + 8] = 0xFF;
+	sprite_ram[player_hair_back + 9] = 52;
+	sprite_ram[player_hair_back + 10] = 1;
+	sprite_ram[player_hair_back + 11] = 0xFF;
+	
+	sprite_ram[player_hair_back + 12] = 0xFF;
+	sprite_ram[player_hair_back + 13] = 53;
+	sprite_ram[player_hair_back + 14] = 1;
+	sprite_ram[player_hair_back + 15] = 0xFF;
 	
 	player.x = 0x8A00;
 	player.y = 0x0100;
