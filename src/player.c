@@ -35,8 +35,11 @@ byte_t on_floor() {
 
 byte_t on_wall() {
 	short x_off = 0x1100;
-	/* We're not using direction here just in case */
-	if(player.vx < 0) {
+
+	/* I believe we need to use direction because once we're on a wall our
+	 * velocity will be zero, more or less. This could lead to weird jank
+	 * in rare cases but hopefully it's fine. */
+	if(player.direction) {
 		x_off = -0x100;
 	}
 	
@@ -145,14 +148,21 @@ void update_player_sprites() {
 }
 
 #define ACCELERATION 24
+#define MAX_SLIDE 0x50 /* Half a pixel per second */
 
 void player_tick() {	
+	/* acceleration x */
 	signed char ax = 0;
+	/* keeps track if we are pushing the same direction as we are moving (to
+	 * slide down wall) */
+	byte_t slide_is_input = 0;
 	if(J_LEFT) {
 		ax = -ACCELERATION;
+		if(player.direction) slide_is_input = 1;
 	}
 	else if(J_RIGHT) {
 		ax = ACCELERATION;
+		if(!player.direction) slide_is_input = 1;
 	}
 	else {
 		ax = -8;
@@ -183,6 +193,11 @@ void player_tick() {
 	}
 	
 	player.vy += GRAVITY;
+	
+	if(slide_is_input && on_wall()) {
+		if(player.vy > MAX_SLIDE) player.vy = MAX_SLIDE;
+	}
+	
 	if(J_A) {
 		if(player.jump_frames < 5) {
 			if(player.air_frames < 4) {
