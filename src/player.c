@@ -110,7 +110,7 @@ void player_tick() {
 		if(player.jump_frames > 0) {
 			player.vy -= player.jump_amount;
 			--player.jump_frames;
-			player.jump_amount -= 10;
+			player.jump_amount -= 15;
 		}
 	}
 	else {
@@ -120,9 +120,8 @@ void player_tick() {
 	player_move_with_collisions();
 	//player.x += player.vx;
 	//player.y += player.vy;
-	if(on_floor() && player.jump_frames < 25) {
+	if(on_floor()) {
 		player.air_frames = 0;
-		player.jump_frames = 0;
 	}
 	else {
 		if(player.air_frames < 32) ++player.air_frames;
