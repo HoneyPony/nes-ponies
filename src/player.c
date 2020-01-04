@@ -12,6 +12,7 @@ struct player_t {
 	byte_t air_frames;
 	byte_t jump_frames;
 	byte_t direction; /* 0 for normal (right), 1 for flipped */
+	byte_t walljump_counter;
 	unsigned short jump_amount;
 } player;
 
@@ -160,7 +161,16 @@ void player_tick() {
 		player.vx += ax;
 		if(player.vx < 15 && player.vx > -15) player.vx = 0;
 	}
-	player.vx += ax;
+	/* After walljumping, we don't want to accelerate at all for a few
+	 * frames. This gives the player a chance to change which directional
+	 * input they're inputting.
+	 *
+	 * It also prevents us from climbing a singular wall. We can change this
+	 * at somepoint if we want.
+	 */
+	if(!player.walljump_counter)
+		player.vx += ax;
+	
 	if(player.vx > 0x200) player.vx = 0x200;
 	if(player.vx < -0x200) player.vx = -0x200;
 	
@@ -183,10 +193,11 @@ void player_tick() {
 			}
 			
 			if(on_wall()) {
-				player.jump_frames = 6;
+				player.jump_frames = 7;
 				player.jump_amount = 0x90 + JUMP_CORRECTION;
 				player.air_frames = 32;
 				player.vy = 0;
+				player.walljump_counter = 5;
 				if(player.vx < 0) {
 					player.vx = 0x200;
 				}
@@ -207,6 +218,10 @@ void player_tick() {
 	}
 	else {
 		player.jump_frames = 0;
+	}
+	
+	if(player.walljump_counter > 0) {
+		--player.walljump_counter;
 	}
 	
 	player_move_with_collisions();
