@@ -115,6 +115,9 @@ void player_tick() {
 			--player.jump_frames;
 			player.jump_amount -= 16;
 		}
+		else {
+			player.vy -= 4; /* slow gravity */
+		}
 	}
 	else {
 		player.jump_frames = 0;
