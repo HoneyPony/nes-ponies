@@ -32,6 +32,17 @@ byte_t on_floor() {
 		map_kind((player.x + 0xF00) >> 11, (player.y + 0x1900) >> 11);
 }
 
+byte_t on_wall() {
+	short x_off = 0x1100;
+	/* We're not using direction here just in case */
+	if(player.vx < 0) {
+		x_off = -0x100;
+	}
+	
+	return map_kind((player.x + x_off) >> 11, player.y >> 11) |
+		map_kind((player.x + x_off) >> 11, (player.y + 0x1700) >> 11);
+}
+
 #define COL_LOOP(delta, cmp, axis)\
 for(;;){\
 	if(delta cmp v) {\
@@ -163,11 +174,26 @@ void player_tick() {
 	
 	player.vy += GRAVITY;
 	if(J_A) {
-		if(player.air_frames < 4 && player.jump_frames == 0) {
-			player.jump_frames = 9;
-			player.jump_amount = 0xA0 + JUMP_CORRECTION;
-			player.air_frames = 32;
-			player.vy = 0;
+		if(player.jump_frames < 5) {
+			if(player.air_frames < 4) {
+				player.jump_frames = 9;
+				player.jump_amount = 0xA0 + JUMP_CORRECTION;
+				player.air_frames = 32;
+				player.vy = 0;
+			}
+			
+			if(on_wall()) {
+				player.jump_frames = 6;
+				player.jump_amount = 0x90 + JUMP_CORRECTION;
+				player.air_frames = 32;
+				player.vy = 0;
+				if(player.vx < 0) {
+					player.vx = 0x200;
+				}
+				else {
+					player.vx = -0x200;
+				}
+			}
 		}
 		
 		if(player.jump_frames > 0) {
