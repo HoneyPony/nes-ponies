@@ -24,6 +24,18 @@ typedef unsigned char byte_t;
 
 extern byte_t controller;
 
+#include "zeropage-vars.h"
+
+extern unsigned short prng_seed;
+extern byte_t prng_out;
+
+#pragma zpsym ("prng_seed")
+#pragma zpsym ("prng_out")
+
+#include "normal-vars.h"
+
+extern void prng();
+
 #define J_RIGHT  (controller & 0x01)
 #define J_LEFT   (controller & 0x02)
 #define J_DOWN   (controller & 0x04)

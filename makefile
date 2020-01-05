@@ -11,7 +11,8 @@ player.c\
 graphics.s\
 nmi.s\
 sprite_ram.s\
-poll_input.s
+poll_input.s\
+prng.s
 
 
 

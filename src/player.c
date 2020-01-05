@@ -36,6 +36,9 @@ struct hair_t {
 	
 	short x5;
 	short y5;
+	
+	/* Added for a small bit of noise. */
+	signed char wind;
 } hair;
 
 #include "normal-vars.h"
@@ -369,13 +372,19 @@ void player_tick() {
 	
 	update_player_sprites();
 	
+	///* By incrementing a signed char every frame, we get a varying-sign 
+	// * variable to use as an extra little effect on the hair. */
+	//hair.wind += 15;
+	
+	prng();
+	
 	v_buffer[4] = v_buffer[2];
 	v_buffer[5] = v_buffer[3];
 	
 	v_buffer[2] = v_buffer[0];
 	v_buffer[3] = v_buffer[1];
 	
-	v_buffer[0] = player.vx;
+	v_buffer[0] = player.vx + prng_out;
 	v_buffer[1] = player.vy;
 }
 
@@ -471,4 +480,6 @@ void player_init() {
 	v_buffer[3] = 0;
 	v_buffer[4] = 0;
 	v_buffer[5] = 0;
+	
+	prng_seed = 0x137d;
 }
