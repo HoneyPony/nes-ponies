@@ -122,32 +122,66 @@ void player_move_with_collisions() {
 #define GRAVITY 32
 #define JUMP_CORRECTION 15
 
-#define HAIR_SHIFT 4
+byte_t map_hair(short x, signed char anchor) {
+	if(player.direction) {
+		x -= (anchor << 8);
+		/* In order to get the flipped anchor position, we extrapolate
+		 * from the operation we do in arranging the pony sprites (i.e.
+		 * flip between adding 8 and 0 as offsets) in order to get a
+		 * formula of 8 pixels - x to flip a given sprite around the
+		 * proper pivot. Our numbers now are in subpixels so we have to
+		 * use 0x800 for eight pixels.
+		 */
+		x += 0x800 - (anchor << 8);
+	}
+	
+	return x >> 8;
+}
 
 void test_player_hair() {
+	/* In order to properly flip the hair sprites, we need to flip them but
+	 * keep their motion relative to their anchor position. To do that we
+	 * need to subtract their original anchor position to get the relative
+	 * position to their anchor, and then add that relative position back
+	 * to the flipped anchor position.
+	 *
+	 * This is accomplished in map_hair() for each x position.
+	 */
+	 
+	 byte_t attributes = 0b00000001;
+	 if(player.direction) {
+		 attributes = 0b01000001;
+	 }
+	
 	/* hair 0 */
 	sprite_ram[player_hair_front]     = (hair.y0 >> 8) - 1;
-	sprite_ram[player_hair_front + 3] = hair.x0 >> 8;
+	sprite_ram[player_hair_front + 2] = attributes;
+	sprite_ram[player_hair_front + 3] = map_hair(hair.x0, 8);
 
 	/* hair 1 */
 	sprite_ram[player_hair_back    ] = (hair.y1 >> 8) - 1;
-	sprite_ram[player_hair_back + 3] = hair.x1 >> 8;
+	sprite_ram[player_hair_back + 2] = attributes;
+	sprite_ram[player_hair_back + 3] = map_hair(hair.x1, 4);
 	
 	/* hair 2 */
 	sprite_ram[player_hair_front + 4] = (hair.y2 >> 8) - 1;
-	sprite_ram[player_hair_front + 7] = hair.x2 >> 8;
+	sprite_ram[player_hair_front + 6] = attributes;
+	sprite_ram[player_hair_front + 7] = map_hair(hair.x2, 5);
 	
 	/* hair 3 */
 	sprite_ram[player_hair_back + 4] = (hair.y3 >> 8) - 1;
-	sprite_ram[player_hair_back + 7] = hair.x3 >> 8;
+	sprite_ram[player_hair_back + 6] = attributes;
+	sprite_ram[player_hair_back + 7] = map_hair(hair.x3, -3);
 	
 	/* hair 4 */
 	sprite_ram[player_hair_back + 8] = (hair.y4 >> 8) - 1;
-	sprite_ram[player_hair_back + 11] = hair.x4 >> 8;
+	sprite_ram[player_hair_back + 10] = attributes;
+	sprite_ram[player_hair_back + 11] = map_hair(hair.x4, -4);
 	
 	/* hair 5 */
 	sprite_ram[player_hair_back + 12] = (hair.y5 >> 8) - 1;
-	sprite_ram[player_hair_back + 15] = hair.x5 >> 8;
+	sprite_ram[player_hair_back + 14] = attributes;
+	sprite_ram[player_hair_back + 15] = map_hair(hair.x5, -3);
 }
 
 void update_player_sprites() {
