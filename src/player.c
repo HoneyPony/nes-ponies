@@ -120,7 +120,7 @@ void player_move_with_collisions() {
 #define GRAVITY 32
 #define JUMP_CORRECTION 15
 
-#define HAIR_SHIFT 5
+#define HAIR_SHIFT 4
 
 void test_player_hair() {
 	signed char dx = hair.x0 >> HAIR_SHIFT;
@@ -230,49 +230,79 @@ void update_player_sprites() {
 #define HAIR_DELTA_SHIFT 5
 
 void hair_clamp(signed char *what) {
-	if(*what > 0b01000000) {
-		*what = 0b01000000;
+	if(*what > -2 && *what < 2) *what = 0;
+}
+
+void hair_single(signed char *n, signed char add) {
+	if(*n > 0) {
+		if(120 - *n < add) {
+			*n = 120;
+		}
+		else *n += add;
+		
+		//*n -= 4;
 	}
-	if(*what < -0b01000000) {
-		*what = -0b01000000;
+	if(*n < 0) {
+		if(-120 - *n > add) {
+			*n = -120;
+		}
+		else *n += add;
+		
+		//*n += 4;
 	}
+	
+	if(*n > -6 && *n < 6) *n = 0;
 }
 
 void hair_physics() {
 	signed char vx = -player.vx >> 8;
 	signed char vy = -player.vy >> 8;
-	vx <<= 5;
-	vy <<= 5;
+	//vx <<= 5;
+	//vy <<= 5;
+	
+	hair_single(&hair.x0, vx);
+	hair_single(&hair.x1, vx);
+	hair_single(&hair.x2, vx);
+	hair_single(&hair.x3, vx);
+	hair_single(&hair.x4, vx);
+	hair_single(&hair.x5, vx);
+	
+	hair_single(&hair.y0, vy);
+	hair_single(&hair.y1, vy);
+	hair_single(&hair.y2, vy);
+	hair_single(&hair.y3, vy);
+	hair_single(&hair.y4, vy);
+	hair_single(&hair.y5, vy);
 	
 	/* TODO: add components independently so we only need 1 local var */
 	/* root hairs = 0, 1, 3 */
-	hair.x0 += vx;
-	hair.y0 += vy;
-	hair.x1 += vx;
-	hair.y1 += vy;
-	hair.x3 += vx;
-	hair.y3 += vy;
+	// hair.x0 += vx;
+	// hair.y0 += vy;
+	// hair.x1 += vx;
+	// hair.y1 += vy;
+	// hair.x3 += vx;
+	// hair.y3 += vy;
 	
-	hair.x2 += vx;
-	hair.y2 += vy;
-	hair.x4 += vx;
-	hair.y4 += vy;
-	hair.x5 += vx;
-	hair.y5 += vy;
+	// hair.x2 += vx;
+	// hair.y2 += vy;
+	// hair.x4 += vx;
+	// hair.y4 += vy;
+	// hair.x5 += vx;
+	// hair.y5 += vy;
 	
-	hair.x0 >>= 1;
-	hair.x1 >>= 1;
-	hair.x2 >>= 1;
-	hair.x3 >>= 1;
-	hair.x4 >>= 1;
-	hair.x5 >>= 1;
+	// hair.x0 >>= 1;
+	// hair.x1 >>= 1;
+	// hair.x2 >>= 1;
+	// hair.x3 >>= 1;
+	// hair.x4 >>= 1;
+	// hair.x5 >>= 1;
 	
-	hair.y0 >>= 1;
-	hair.y1 >>= 1;
-	hair.y2 >>= 1;
-	hair.y3 >>= 1;
-	hair.y4 >>= 1;
-	hair.y5 >>= 1;
+	// hair.y0 >>= 1;
+	// hair.y1 >>= 1;
+	// hair.y2 >>= 1;
+	// hair.y3 >>= 1;
+	// hair.y4 >>= 1;
+	// hair.y5 >>= 1;
 	
 	// hair_clamp(&hair.x0);
 	// hair_clamp(&hair.x1);
