@@ -369,6 +369,8 @@ void player_tick() {
 				player.air_frames = 32;
 				player.vy = 0;
 				player.walljump_counter = 5;
+				/* There appears to be a glitch because we are
+				 * not using direction here. TODO */
 				if(player.vx < 0) {
 					player.vx = 0x200;
 				}
