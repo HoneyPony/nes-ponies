@@ -16,24 +16,26 @@ struct player_t {
 	unsigned short jump_amount;
 } player;
 
+short v_buffer[6];
+
 struct hair_t {
-	signed char x0;
-	signed char y0;
+	short x0;
+	short y0;
 	
-	signed char x1;
-	signed char y1;
+	short x1;
+	short y1;
 	
-	signed char x2;
-	signed char y2;
+	short x2;
+	short y2;
 	
-	signed char x3;
-	signed char y3;
+	short x3;
+	short y3;
 	
-	signed char x4;
-	signed char y4;
+	short x4;
+	short y4;
 	
-	signed char x5;
-	signed char y5;
+	short x5;
+	short y5;
 } hair;
 
 #include "normal-vars.h"
@@ -123,53 +125,29 @@ void player_move_with_collisions() {
 #define HAIR_SHIFT 4
 
 void test_player_hair() {
-	signed char dx = hair.x0 >> HAIR_SHIFT;
-	signed char dy = hair.y0 >> HAIR_SHIFT;
-	
-	byte_t y = (player.y >> 8) - 1;
-	byte_t x = (player.x >> 8);
-	
 	/* hair 0 */
-	sprite_ram[player_hair_front] = y + 2 + dy;
-	sprite_ram[player_hair_front + 3] = x + 8 + dx;
-	
-	dx = hair.x1 >> HAIR_SHIFT;
-	dy = hair.y1 >> HAIR_SHIFT;
+	sprite_ram[player_hair_front]     = (hair.y0 >> 8) - 1;
+	sprite_ram[player_hair_front + 3] = hair.x0 >> 8;
 
 	/* hair 1 */
-	sprite_ram[player_hair_back] = y + 2 + dy;
-	sprite_ram[player_hair_back + 3] = x + 4 + dx;
-	
-	/* hair 2 is parented to hair 1 */
-	dx += hair.x2 >> HAIR_SHIFT;
-	dy += hair.y2 >> HAIR_SHIFT;
+	sprite_ram[player_hair_back    ] = (hair.y1 >> 8) - 1;
+	sprite_ram[player_hair_back + 3] = hair.x1 >> 8;
 	
 	/* hair 2 */
-	sprite_ram[player_hair_front + 4] = y + 6 + dy;
-	sprite_ram[player_hair_front + 7] = x + 5 + dx;
-	
-	/* Hair 3 not parented to other hair */
-	dx = hair.x3 >> HAIR_SHIFT;
-	dy = hair.y3 >> HAIR_SHIFT;
+	sprite_ram[player_hair_front + 4] = (hair.y2 >> 8) - 1;
+	sprite_ram[player_hair_front + 7] = hair.x2 >> 8;
 	
 	/* hair 3 */
-	sprite_ram[player_hair_back + 4] = y + 7 + dy;
-	sprite_ram[player_hair_back + 7] = x - 3 + dx;
-	
-	/* hair 5 parented to 4, 4 parented to 3 */
-	dx += hair.x4 >> HAIR_SHIFT;
-	dy += hair.y4 >> HAIR_SHIFT;
+	sprite_ram[player_hair_back + 4] = (hair.y3 >> 8) - 1;
+	sprite_ram[player_hair_back + 7] = hair.x3 >> 8;
 	
 	/* hair 4 */
-	sprite_ram[player_hair_back + 8] = y + 9 + dy;
-	sprite_ram[player_hair_back + 11] = x - 4 + dx;
-	
-	dx += hair.x5 >> HAIR_SHIFT;
-	dy += hair.y5 >> HAIR_SHIFT;
+	sprite_ram[player_hair_back + 8] = (hair.y4 >> 8) - 1;
+	sprite_ram[player_hair_back + 11] = hair.x4 >> 8;
 	
 	/* hair 5 */
-	sprite_ram[player_hair_back + 12] = y + 13 + dy;
-	sprite_ram[player_hair_back + 15] = x - 3 + dx;
+	sprite_ram[player_hair_back + 12] = (hair.y5 >> 8) - 1;
+	sprite_ram[player_hair_back + 15] = hair.x5 >> 8;
 }
 
 void update_player_sprites() {
@@ -226,109 +204,27 @@ void update_player_sprites() {
 #define ACCELERATION 24
 #define MAX_SLIDE 0x50 /* Half a pixel per second */
 
-#define HAIR_PV_SHIFT 8
-#define HAIR_DELTA_SHIFT 5
-
-void hair_clamp(signed char *what) {
-	if(*what > -2 && *what < 2) *what = 0;
-}
-
-void hair_single(signed char *n, signed char add) {
-	if(*n > 0) {
-		if(120 - *n < add) {
-			*n = 120;
-		}
-		else *n += add;
-		
-		//*n -= 4;
-	}
-	if(*n < 0) {
-		if(-120 - *n > add) {
-			*n = -120;
-		}
-		else *n += add;
-		
-		//*n += 4;
-	}
-	
-	if(*n > -6 && *n < 6) *n = 0;
-}
-
 void hair_physics() {
-	signed char vx = -player.vx >> 8;
-	signed char vy = -player.vy >> 8;
-	//vx <<= 5;
-	//vy <<= 5;
-	
-	hair_single(&hair.x0, vx);
-	hair_single(&hair.x1, vx);
-	hair_single(&hair.x2, vx);
-	hair_single(&hair.x3, vx);
-	hair_single(&hair.x4, vx);
-	hair_single(&hair.x5, vx);
-	
-	hair_single(&hair.y0, vy);
-	hair_single(&hair.y1, vy);
-	hair_single(&hair.y2, vy);
-	hair_single(&hair.y3, vy);
-	hair_single(&hair.y4, vy);
-	hair_single(&hair.y5, vy);
-	
-	/* TODO: add components independently so we only need 1 local var */
 	/* root hairs = 0, 1, 3 */
-	// hair.x0 += vx;
-	// hair.y0 += vy;
-	// hair.x1 += vx;
-	// hair.y1 += vy;
-	// hair.x3 += vx;
-	// hair.y3 += vy;
+	hair.x0 += v_buffer[0];
+	hair.y0 += v_buffer[1];
 	
-	// hair.x2 += vx;
-	// hair.y2 += vy;
-	// hair.x4 += vx;
-	// hair.y4 += vy;
-	// hair.x5 += vx;
-	// hair.y5 += vy;
+	hair.x1 += v_buffer[0];
+	hair.y1 += v_buffer[1];
 	
-	// hair.x0 >>= 1;
-	// hair.x1 >>= 1;
-	// hair.x2 >>= 1;
-	// hair.x3 >>= 1;
-	// hair.x4 >>= 1;
-	// hair.x5 >>= 1;
+	hair.x3 += v_buffer[0];
+	hair.y3 += v_buffer[1];
 	
-	// hair.y0 >>= 1;
-	// hair.y1 >>= 1;
-	// hair.y2 >>= 1;
-	// hair.y3 >>= 1;
-	// hair.y4 >>= 1;
-	// hair.y5 >>= 1;
+	/* hairs 2 and 4 are parented */
+	hair.x2 += v_buffer[2];
+	hair.y2 += v_buffer[3];
 	
-	// hair_clamp(&hair.x0);
-	// hair_clamp(&hair.x1);
-	// hair_clamp(&hair.x2);
-	// hair_clamp(&hair.x3);
-	// hair_clamp(&hair.x4);
-	// hair_clamp(&hair.x5);
+	hair.x4 += v_buffer[2];
+	hair.y4 += v_buffer[3];
 	
-	// hair_clamp(&hair.y0);
-	// hair_clamp(&hair.y1);
-	// hair_clamp(&hair.y2);
-	// hair_clamp(&hair.y3);
-	// hair_clamp(&hair.y4);
-	// hair_clamp(&hair.y5);
-	
-	// /* 2 is parented to 1 */
-	// hair.x2 += hair.x1 >> HAIR_DELTA_SHIFT;
-	// hair.y2 += hair.y1 >> HAIR_DELTA_SHIFT;
-	
-	// /* 5 parented to 4 */
-	// hair.x5 += hair.x4 >> HAIR_DELTA_SHIFT;
-	// hair.y5 += hair.y4 >> HAIR_DELTA_SHIFT;
-	
-	// /* 4 parented to 3 */
-	// hair.x4 += hair.x3 >> HAIR_DELTA_SHIFT;
-	// hair.y4 += hair.y3 >> HAIR_DELTA_SHIFT;
+	/* hair 5 is parented to 4, which is itself parented */
+	hair.x5 += v_buffer[4];
+	hair.y5 += v_buffer[5];
 }
 
 void player_tick() {	
@@ -438,6 +334,15 @@ void player_tick() {
 	}
 	
 	update_player_sprites();
+	
+	v_buffer[4] = v_buffer[2];
+	v_buffer[5] = v_buffer[3];
+	
+	v_buffer[2] = v_buffer[0];
+	v_buffer[3] = v_buffer[1];
+	
+	v_buffer[0] = player.vx;
+	v_buffer[1] = player.vy;
 }
 
 void player_init() {
@@ -513,16 +418,23 @@ void player_init() {
 	player.air_frames = 0;
 	player.direction = 0;
 	
-	hair.x0 = 0;
-	hair.y0 = 0;
-	hair.x1 = 0;
-	hair.y1 = 0;
-	hair.x2 = 0;
-	hair.y2 = 0;
-	hair.x3 = 0;
-	hair.y3 = 0;
-	hair.x4 = 0;
-	hair.y4 = 0;
-	hair.x5 = 0;
-	hair.y5 = 0;
+	hair.x0 = player.x + (8 << 8);
+	hair.y0 = player.y + (2 << 8);
+	hair.x1 = player.x + (4 << 8);
+	hair.y1 = player.y + (2 << 8);
+	hair.x2 = player.x + (5 << 8);
+	hair.y2 = player.y + (6 << 8);
+	hair.x3 = player.x - (3 << 8);
+	hair.y3 = player.y + (7 << 8);
+	hair.x4 = player.x - (4 << 8);
+	hair.y4 = player.y + (9 << 8);
+	hair.x5 = player.x - (3 << 8);
+	hair.y5 = player.y + (13 << 8);
+	
+	v_buffer[0] = 0;
+	v_buffer[1] = 0;
+	v_buffer[2] = 0;
+	v_buffer[3] = 0;
+	v_buffer[4] = 0;
+	v_buffer[5] = 0;
 }
