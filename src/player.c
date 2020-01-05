@@ -163,11 +163,22 @@ byte_t map_hair(short x, signed char anchor) {
 }
 
 signed short wind(byte_t buf, byte_t offset) {
-	return wind_frames[((wind_buffer[buf] >> 2) + offset) & 0xF] << 1;
+	byte_t shift = 2;
+	if(player.vx < -0x80 || player.vx > 0x80) {
+		shift = 1;
+	}
+	return (signed short)(wind_frames[((wind_buffer[buf] >> shift) + offset) & 0xF]) << 1;
 }
 
 signed char wind2(byte_t buf, byte_t offset) {
-	return wind_frames[((wind_buffer[buf] >> 2) + offset) & 0xF];
+	byte_t shift = 2;
+	if(player.vx < -0x80 || player.vx > 0x80) {
+		shift = 1;
+	}
+	// if(player.vx < -0x80 || player.vx > 0x80) {
+		// return 0;
+	// }
+	return wind_frames[((wind_buffer[buf] >> shift) + offset) & 0xF];
 }
 
 void test_player_hair() {
@@ -192,31 +203,31 @@ void test_player_hair() {
 		map_hair(hair.x0 + wind(0, 0), 8);
 
 	/* hair 1 */
-	sprite_ram[player_hair_back    ] = ((hair.y1 + wind2(0, 14)) >> 8) - 1;
+	sprite_ram[player_hair_back    ] = ((hair.y1 + wind2(0, 8)) >> 8) - 1;
 	sprite_ram[player_hair_back + 2] = attributes;
 	sprite_ram[player_hair_back + 3] = 
 		map_hair(hair.x1 + wind(0, 5), 4);
 	
 	/* hair 2 */
-	sprite_ram[player_hair_front + 4] = ((hair.y2 + wind2(1, 14)) >> 8) - 1;
+	sprite_ram[player_hair_front + 4] = ((hair.y2 + wind2(1, 8)) >> 8) - 1;
 	sprite_ram[player_hair_front + 6] = attributes;
 	sprite_ram[player_hair_front + 7] = 
 		map_hair(hair.x2 + wind(1, 5), 5);
 	
 	/* hair 3 */
-	sprite_ram[player_hair_back + 4] = ((hair.y3 + wind2(0, 14)) >> 8) - 1;
+	sprite_ram[player_hair_back + 4] = ((hair.y3 + wind2(0, 6)) >> 8) - 1;
 	sprite_ram[player_hair_back + 6] = attributes;
 	sprite_ram[player_hair_back + 7] = 
 		map_hair(hair.x3 + wind2(0, 3), -3);
 	
 	/* hair 4 */
-	sprite_ram[player_hair_back + 8] = ((hair.y4 + wind2(1, 13)) >> 8) - 1;
+	sprite_ram[player_hair_back + 8] = ((hair.y4 + wind2(1, 6)) >> 8) - 1;
 	sprite_ram[player_hair_back + 10] = attributes;
 	sprite_ram[player_hair_back + 11] =
 		map_hair(hair.x4 + wind2(1, 3), -4);
 	
 	/* hair 5 */
-	sprite_ram[player_hair_back + 12] = ((hair.y5 + wind2(2, 13)) >> 8) - 1;
+	sprite_ram[player_hair_back + 12] = ((hair.y5 + wind2(2, 6)) >> 8) - 1;
 	sprite_ram[player_hair_back + 14] = attributes;
 	sprite_ram[player_hair_back + 15] = 
 		map_hair(hair.x5 + wind(2, 3), -3);
