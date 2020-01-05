@@ -17,6 +17,9 @@ struct player_t {
 } player;
 
 short v_buffer[6];
+byte_t wind_buffer[3];
+
+byte_t wind_index;
 
 struct hair_t {
 	short x0;
@@ -36,12 +39,30 @@ struct hair_t {
 	
 	short x5;
 	short y5;
-	
-	/* Added for a small bit of noise. */
-	signed char wind;
 } hair;
 
 #include "normal-vars.h"
+
+const signed char wind_frames[] = {
+	0,
+	49,
+	90,
+	117,
+	127,
+	117,
+	90,
+	49,
+	0,
+	-49,
+	-90,
+	-117,
+	-127,
+	-117,
+	-90,
+	-49
+
+
+};
 
 byte_t player_sprite;
 byte_t player_hair_front;
@@ -137,8 +158,16 @@ byte_t map_hair(short x, signed char anchor) {
 		 */
 		x += 0x800 - (anchor << 8);
 	}
-	
+
 	return x >> 8;
+}
+
+signed short wind(byte_t buf, byte_t offset) {
+	return wind_frames[((wind_buffer[buf] >> 2) + offset) & 0xF] << 1;
+}
+
+signed char wind2(byte_t buf, byte_t offset) {
+	return wind_frames[((wind_buffer[buf] >> 2) + offset) & 0xF];
 }
 
 void test_player_hair() {
@@ -157,34 +186,40 @@ void test_player_hair() {
 	 }
 	
 	/* hair 0 */
-	sprite_ram[player_hair_front]     = (hair.y0 >> 8) - 1;
+	sprite_ram[player_hair_front]     = ((hair.y0 + wind2(0, 10)) >> 8) - 1;
 	sprite_ram[player_hair_front + 2] = attributes;
-	sprite_ram[player_hair_front + 3] = map_hair(hair.x0, 8);
+	sprite_ram[player_hair_front + 3] =
+		map_hair(hair.x0 + wind(0, 0), 8);
 
 	/* hair 1 */
-	sprite_ram[player_hair_back    ] = (hair.y1 >> 8) - 1;
+	sprite_ram[player_hair_back    ] = ((hair.y1 + wind2(0, 14)) >> 8) - 1;
 	sprite_ram[player_hair_back + 2] = attributes;
-	sprite_ram[player_hair_back + 3] = map_hair(hair.x1, 4);
+	sprite_ram[player_hair_back + 3] = 
+		map_hair(hair.x1 + wind(0, 5), 4);
 	
 	/* hair 2 */
-	sprite_ram[player_hair_front + 4] = (hair.y2 >> 8) - 1;
+	sprite_ram[player_hair_front + 4] = ((hair.y2 + wind2(1, 14)) >> 8) - 1;
 	sprite_ram[player_hair_front + 6] = attributes;
-	sprite_ram[player_hair_front + 7] = map_hair(hair.x2, 5);
+	sprite_ram[player_hair_front + 7] = 
+		map_hair(hair.x2 + wind(1, 5), 5);
 	
 	/* hair 3 */
-	sprite_ram[player_hair_back + 4] = (hair.y3 >> 8) - 1;
+	sprite_ram[player_hair_back + 4] = ((hair.y3 + wind2(0, 14)) >> 8) - 1;
 	sprite_ram[player_hair_back + 6] = attributes;
-	sprite_ram[player_hair_back + 7] = map_hair(hair.x3, -3);
+	sprite_ram[player_hair_back + 7] = 
+		map_hair(hair.x3 + wind2(0, 3), -3);
 	
 	/* hair 4 */
-	sprite_ram[player_hair_back + 8] = (hair.y4 >> 8) - 1;
+	sprite_ram[player_hair_back + 8] = ((hair.y4 + wind2(1, 13)) >> 8) - 1;
 	sprite_ram[player_hair_back + 10] = attributes;
-	sprite_ram[player_hair_back + 11] = map_hair(hair.x4, -4);
+	sprite_ram[player_hair_back + 11] =
+		map_hair(hair.x4 + wind2(1, 3), -4);
 	
 	/* hair 5 */
-	sprite_ram[player_hair_back + 12] = (hair.y5 >> 8) - 1;
+	sprite_ram[player_hair_back + 12] = ((hair.y5 + wind2(2, 13)) >> 8) - 1;
 	sprite_ram[player_hair_back + 14] = attributes;
-	sprite_ram[player_hair_back + 15] = map_hair(hair.x5, -3);
+	sprite_ram[player_hair_back + 15] = 
+		map_hair(hair.x5 + wind(2, 3), -3);
 }
 
 void update_player_sprites() {
@@ -372,20 +407,19 @@ void player_tick() {
 	
 	update_player_sprites();
 	
-	///* By incrementing a signed char every frame, we get a varying-sign 
-	// * variable to use as an extra little effect on the hair. */
-	//hair.wind += 15;
-	
-	prng();
-	
 	v_buffer[4] = v_buffer[2];
 	v_buffer[5] = v_buffer[3];
+	wind_buffer[2] = wind_buffer[1];
 	
 	v_buffer[2] = v_buffer[0];
 	v_buffer[3] = v_buffer[1];
+	wind_buffer[1] = wind_buffer[0];
 	
-	v_buffer[0] = player.vx + prng_out;
+	v_buffer[0] = player.vx;
 	v_buffer[1] = player.vy;
+	++wind_buffer[0];
+	
+	//++wind_index;
 }
 
 void player_init() {
@@ -480,6 +514,12 @@ void player_init() {
 	v_buffer[3] = 0;
 	v_buffer[4] = 0;
 	v_buffer[5] = 0;
+	
+	wind_buffer[0] = 0;
+	wind_buffer[1] = 0;
+	wind_buffer[2] = 0;
+	
+	wind_index = 0;
 	
 	prng_seed = 0x137d;
 }
