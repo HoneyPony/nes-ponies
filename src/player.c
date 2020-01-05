@@ -378,9 +378,33 @@ void player_tick() {
 				player.air_frames = 32;
 				player.vy = 0;
 				player.walljump_counter = 5;
-				/* There appears to be a glitch because we are
-				 * not using direction here. TODO */
-				if(player.vx < 0) {
+
+				/* We use direction here because otherwise if
+				 * we are facing towards a left wall we can
+				 * reach a velocity of zero and then repeatedly
+				 * right-wall jump off of the wall.
+				 *
+				 * In theory the player can reach a wall
+				 * backwards by reaching it with very low
+				 * velocity in the direction opposite they are
+				 * facing, and then get infinite wall jumps that
+				 * way, but we'll leave that as a potential
+				 * speedrunning trick rather than do something
+				 * to fix it because it should be pretty hard to
+				 * do and not encountered in normal gameplay.
+				 *
+				 * However, even that seems to already be
+				 * impossible because on_wall() only checks in
+				 * the direction we are facing. So it seems the
+				 * last paragraph is probably completely wrong,
+				 * and so I'll leave it in as possible
+				 * documentation in case such a feature does
+				 * exist but some testing shows it doesn't seem
+				 * to work. (wall jumping when facing the wrong
+				 * way seems to just propel you in the direction
+				 * you are facing).
+				 */
+				if(player.direction) {
 					player.vx = 0x200;
 				}
 				else {
