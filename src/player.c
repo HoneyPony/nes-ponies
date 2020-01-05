@@ -16,6 +16,26 @@ struct player_t {
 	unsigned short jump_amount;
 } player;
 
+struct hair_t {
+	signed char x0;
+	signed char y0;
+	
+	signed char x1;
+	signed char y1;
+	
+	signed char x2;
+	signed char y2;
+	
+	signed char x3;
+	signed char y3;
+	
+	signed char x4;
+	signed char y4;
+	
+	signed char x5;
+	signed char y5;
+} hair;
+
 #include "normal-vars.h"
 
 byte_t player_sprite;
@@ -100,33 +120,56 @@ void player_move_with_collisions() {
 #define GRAVITY 32
 #define JUMP_CORRECTION 15
 
+#define HAIR_SHIFT 5
+
 void test_player_hair() {
+	signed char dx = hair.x0 >> HAIR_SHIFT;
+	signed char dy = hair.y0 >> HAIR_SHIFT;
+	
 	byte_t y = (player.y >> 8) - 1;
 	byte_t x = (player.x >> 8);
 	
 	/* hair 0 */
-	sprite_ram[player_hair_front] = y + 2;
-	sprite_ram[player_hair_front + 3] = x + 8;
+	sprite_ram[player_hair_front] = y + 2 + dy;
+	sprite_ram[player_hair_front + 3] = x + 8 + dx;
+	
+	dx = hair.x1 >> HAIR_SHIFT;
+	dy = hair.y1 >> HAIR_SHIFT;
+
+	/* hair 1 */
+	sprite_ram[player_hair_back] = y + 2 + dy;
+	sprite_ram[player_hair_back + 3] = x + 4 + dx;
+	
+	/* hair 2 is parented to hair 1 */
+	dx += hair.x2 >> HAIR_SHIFT;
+	dy += hair.y2 >> HAIR_SHIFT;
 	
 	/* hair 2 */
-	sprite_ram[player_hair_front + 4] = y + 6;
-	sprite_ram[player_hair_front + 7] = x + 5;
+	sprite_ram[player_hair_front + 4] = y + 6 + dy;
+	sprite_ram[player_hair_front + 7] = x + 5 + dx;
 	
-	/* hair 1 */
-	sprite_ram[player_hair_back] = y + 2;
-	sprite_ram[player_hair_back + 3] = x + 4;
+	/* Hair 3 not parented to other hair */
+	dx = hair.x3 >> HAIR_SHIFT;
+	dy = hair.y3 >> HAIR_SHIFT;
 	
 	/* hair 3 */
-	sprite_ram[player_hair_back + 4] = y + 7;
-	sprite_ram[player_hair_back + 7] = x - 3;
+	sprite_ram[player_hair_back + 4] = y + 7 + dy;
+	sprite_ram[player_hair_back + 7] = x - 3 + dx;
+	
+	/* hair 5 parented to 4, 4 parented to 3 */
+	dx += hair.x4 >> HAIR_SHIFT;
+	dy += hair.y4 >> HAIR_SHIFT;
 	
 	/* hair 4 */
-	sprite_ram[player_hair_back + 8] = y + 9;
-	sprite_ram[player_hair_back + 11] = x - 4;
+	sprite_ram[player_hair_back + 8] = y + 9 + dy;
+	sprite_ram[player_hair_back + 11] = x - 4 + dx;
+	
+	dx += hair.x5 >> HAIR_SHIFT;
+	dy += hair.y5 >> HAIR_SHIFT;
 	
 	/* hair 5 */
-	sprite_ram[player_hair_back + 12] = y + 13;
-	sprite_ram[player_hair_back + 15] = x - 3;
+	sprite_ram[player_hair_back + 12] = y + 13 + dy;
+	sprite_ram[player_hair_back + 15] = x - 3 + dx;
 }
 
 void update_player_sprites() {
@@ -183,12 +226,91 @@ void update_player_sprites() {
 #define ACCELERATION 24
 #define MAX_SLIDE 0x50 /* Half a pixel per second */
 
+#define HAIR_PV_SHIFT 8
+#define HAIR_DELTA_SHIFT 5
+
+void hair_clamp(signed char *what) {
+	if(*what > 0b01000000) {
+		*what = 0b01000000;
+	}
+	if(*what < -0b01000000) {
+		*what = -0b01000000;
+	}
+}
+
+void hair_physics() {
+	signed char vx = -player.vx >> 8;
+	signed char vy = -player.vy >> 8;
+	vx <<= 5;
+	vy <<= 5;
+	
+	/* TODO: add components independently so we only need 1 local var */
+	/* root hairs = 0, 1, 3 */
+	hair.x0 += vx;
+	hair.y0 += vy;
+	hair.x1 += vx;
+	hair.y1 += vy;
+	hair.x3 += vx;
+	hair.y3 += vy;
+	
+	hair.x2 += vx;
+	hair.y2 += vy;
+	hair.x4 += vx;
+	hair.y4 += vy;
+	hair.x5 += vx;
+	hair.y5 += vy;
+	
+	hair.x0 >>= 1;
+	hair.x1 >>= 1;
+	hair.x2 >>= 1;
+	hair.x3 >>= 1;
+	hair.x4 >>= 1;
+	hair.x5 >>= 1;
+	
+	hair.y0 >>= 1;
+	hair.y1 >>= 1;
+	hair.y2 >>= 1;
+	hair.y3 >>= 1;
+	hair.y4 >>= 1;
+	hair.y5 >>= 1;
+	
+	// hair_clamp(&hair.x0);
+	// hair_clamp(&hair.x1);
+	// hair_clamp(&hair.x2);
+	// hair_clamp(&hair.x3);
+	// hair_clamp(&hair.x4);
+	// hair_clamp(&hair.x5);
+	
+	// hair_clamp(&hair.y0);
+	// hair_clamp(&hair.y1);
+	// hair_clamp(&hair.y2);
+	// hair_clamp(&hair.y3);
+	// hair_clamp(&hair.y4);
+	// hair_clamp(&hair.y5);
+	
+	// /* 2 is parented to 1 */
+	// hair.x2 += hair.x1 >> HAIR_DELTA_SHIFT;
+	// hair.y2 += hair.y1 >> HAIR_DELTA_SHIFT;
+	
+	// /* 5 parented to 4 */
+	// hair.x5 += hair.x4 >> HAIR_DELTA_SHIFT;
+	// hair.y5 += hair.y4 >> HAIR_DELTA_SHIFT;
+	
+	// /* 4 parented to 3 */
+	// hair.x4 += hair.x3 >> HAIR_DELTA_SHIFT;
+	// hair.y4 += hair.y3 >> HAIR_DELTA_SHIFT;
+}
+
 void player_tick() {	
 	/* acceleration x */
 	signed char ax = 0;
 	/* keeps track if we are pushing the same direction as we are moving (to
 	 * slide down wall) */
 	byte_t slide_is_input = 0;
+	
+	/* add old velocity to hair so that it lags behind a frame */
+	hair_physics();
+	
 	if(J_LEFT) {
 		ax = -ACCELERATION;
 		if(player.direction) slide_is_input = 1;
@@ -204,6 +326,7 @@ void player_tick() {
 		player.vx += ax;
 		if(player.vx < 15 && player.vx > -15) player.vx = 0;
 	}
+	
 	/* After walljumping, we don't want to accelerate at all for a few
 	 * frames. This gives the player a chance to change which directional
 	 * input they're inputting.
@@ -357,4 +480,17 @@ void player_init() {
 	player.vy = 0;
 	player.air_frames = 0;
 	player.direction = 0;
+	
+	hair.x0 = 0;
+	hair.y0 = 0;
+	hair.x1 = 0;
+	hair.y1 = 0;
+	hair.x2 = 0;
+	hair.y2 = 0;
+	hair.x3 = 0;
+	hair.y3 = 0;
+	hair.x4 = 0;
+	hair.y4 = 0;
+	hair.x5 = 0;
+	hair.y5 = 0;
 }
