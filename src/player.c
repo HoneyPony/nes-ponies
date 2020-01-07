@@ -333,7 +333,9 @@ void player_tick() {
 		if(player.vx < 0) ax = 8;
 		
 		player.vx += ax;
-		if(player.vx < 15 && player.vx > -15) player.vx = 0;
+		if(player.vx < 15 && player.vx > -15) {
+			player.vx = 0;
+		}
 	}
 	
 	/* After walljumping, we don't want to accelerate at all for a few
