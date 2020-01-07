@@ -310,6 +310,9 @@ void hair_physics() {
 	hair.y5 += v_buffer[5];
 }
 
+extern void test_right();
+extern void test_left();
+
 void player_tick() {	
 	/* acceleration x */
 	signed char ax = 0;
@@ -442,6 +445,27 @@ void player_tick() {
 		if(player.air_frames < 32) ++player.air_frames;
 	}
 	
+	/* Because player.x is unsigned, this is how we test for leaving the 
+	 * left side of the screen. It is therefore a stronger version of the
+	 * statement for going off the right and must be tested first for proper
+	 * results. */
+	if((player.x >> 8) > (256 - 8)) {
+		test_left();
+		player.x += 0xF000;
+		/* we don't have to modify player.x here because it is already
+		 * going to wrap around to the right value. */
+	}
+	
+	if((player.x >> 8) > (256 - 16)) {
+		test_right();
+		player.x -= 0xF000;
+	}
+	
+	
+	
+	
+	
+	
 	update_player_sprites();
 	
 	v_buffer[4] = v_buffer[2];
@@ -455,6 +479,8 @@ void player_tick() {
 	v_buffer[0] = player.vx;
 	v_buffer[1] = player.vy;
 	++wind_buffer[0];
+	
+	
 	
 	//++wind_index;
 }

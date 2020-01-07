@@ -33,8 +33,45 @@ const byte_t map_0[] = {
 	M_DONE
 };
 
+const byte_t map_1[] = {
+	M_HLINE, 0b11100000, 14,
+	//M_HLINE, 0b11000000, 12,
+	//M_HLINE, 0b10110000, 10,
+	M_VLINE, 0b00000000, 3,
+	M_VLINE, 0b00000100, 3,
+	M_DONE
+};
+
 extern void read_controller();
 extern byte_t cycle_flag;
+
+void test_left() {
+	PPU.control = 0;
+	PPU.mask = 0;
+	
+	load_map(map_0);
+	
+	SYNC_PPU();
+	PPU.vram.address = 0x20;
+	PPU.vram.address = 0x00;
+	
+	PPU.control = 0b10001000;
+	PPU.mask = 0b00011110;
+}
+
+void test_right() {
+	PPU.control = 0;
+	PPU.mask = 0;
+	
+	load_map(map_1);
+	
+	SYNC_PPU();
+	PPU.vram.address = 0x20;
+	PPU.vram.address = 0x00;
+	
+	PPU.control = 0b10001000;
+	PPU.mask = 0b00011110;
+}
 
 void main(void) {
 	PPU.control = 0;
