@@ -49,7 +49,10 @@ void test_left() {
 	PPU.control = 0;
 	PPU.mask = 0;
 	
+	/* black bg */
+	load_bg(0x0F);
 	load_map(map_0);
+	load_bg(game_palette[0]);
 	
 	SYNC_PPU();
 	PPU.vram.address = 0x20;
@@ -63,7 +66,9 @@ void test_right() {
 	PPU.control = 0;
 	PPU.mask = 0;
 	
+	load_bg(0x0F);
 	load_map(map_1);
+	load_bg(game_palette[0]);
 	
 	SYNC_PPU();
 	PPU.vram.address = 0x20;

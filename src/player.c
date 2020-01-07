@@ -452,13 +452,23 @@ void player_tick() {
 	if((player.x >> 8) > (256 - 8)) {
 		test_left();
 		player.x += 0xF000;
-		/* we don't have to modify player.x here because it is already
-		 * going to wrap around to the right value. */
+		hair.x0 += 0xF000;
+		hair.x1 += 0xF000;
+		hair.x2 += 0xF000;
+		hair.x3 += 0xF000;
+		hair.x4 += 0xF000;
+		hair.x5 += 0xF000;
 	}
 	
 	if((player.x >> 8) > (256 - 16)) {
 		test_right();
 		player.x -= 0xF000;
+		hair.x0 -= 0xF000;
+		hair.x1 -= 0xF000;
+		hair.x2 -= 0xF000;
+		hair.x3 -= 0xF000;
+		hair.x4 -= 0xF000;
+		hair.x5 -= 0xF000;
 	}
 	
 	
