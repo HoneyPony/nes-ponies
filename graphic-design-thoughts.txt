@@ -1,0 +1,12 @@
+Ideas for terrain art:
+- It would be fun to have grass on the top of the terrain that the player sprite
+  is behind. This would be best done by using the same color palette as the
+  normal grass terrain.
+- As such, we may want to choose a color that can mean both dirt and a color of
+  flower, so that we can have flowers on the terrain.
+- We may also want a color that can double as e.g. springs
+
+One big question mark is how to put interactable objects in the environment.
+Interactable objects will likely have to have a different palette than the
+ground so they stand out, which means they can't really be embedded in walls per
+se..?

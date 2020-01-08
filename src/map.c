@@ -1,6 +1,6 @@
-#include <nes.h>
+#include "map.h"
 
-#define SYNC_PPU() /*(__asm__("lda $2002"))*/
+#include "main.h"
 
 #define GR_TL 0x00
 #define GR_TR 0x01
@@ -15,17 +15,14 @@
 
 #define out_nt(tile) (PPU.vram.data = (tile))
 
-typedef unsigned char byte_t;
-
-extern byte_t *sprite_ram;
-
 byte_t collision_bitmap[240];
 byte_t cbit_ptr = 0;
 byte_t cbit_shift = 0;
 
 void out_cb(byte_t k) {
 	byte_t r = collision_bitmap[cbit_ptr];
-	r = ((r & 0x3) << cbit_shift) | (k << cbit_shift);
+	r = (r & ~(0x3 << cbit_shift)) | (k << cbit_shift);
+	collision_bitmap[cbit_ptr] = r;
 	cbit_shift -= 2;
 	if(cbit_shift > 6) {
 		cbit_shift = 6;
@@ -35,7 +32,7 @@ void out_cb(byte_t k) {
 
 void set_cb(byte_t x, byte_t y) {
 	byte_t x_cel = x >> 2;
-	cbit_ptr = x_cel + y << 3;
+	cbit_ptr = x_cel + (y << 3);
 	/* Given x from 0 to 4, our shift should be:
 	 * x == 0 -> 6
 	 * x == 1 -> 4
@@ -47,22 +44,16 @@ void set_cb(byte_t x, byte_t y) {
 	cbit_shift = 6 - (x << 1);
 }
 
-const byte_t palette[] = {
-	0x31, 0x06, 0x16, 0x1A,
-	0x31, 0x0F, 0x0F, 0x0F,
-	0x0F, 0x0F, 0x0F, 0x0F,
-	0x0F, 0x0F, 0x0F, 0x0F,
+byte_t map_kind(byte_t x, byte_t y) {
+	byte_t x_cel, ptr, shift;
 	
-	0x31, 0x30, 0x30, 0x30,
-	0x30, 0x30, 0x30, 0x30,
-	0x30, 0x30, 0x30, 0x30,
-	0x30, 0x30, 0x30, 0x30
-};
-
-const byte_t map_0[] = {
-	0x01, 0b11010000, 14,
-	0x00
-};
+	x_cel = x >> 2;
+	ptr = x_cel + (y << 3);
+	x = x & 0x3;
+	shift = 6 - (x << 1);
+	
+	return (collision_bitmap[ptr] >> shift) & 0x03;
+}
 
 void set_nt(byte_t x, byte_t y) {
 	unsigned short address;
@@ -79,23 +70,25 @@ void set_nt_cb(byte_t x, byte_t y) {
 
 void out_nt_cb(byte_t v) {
 	out_nt(v);
-	out_cb(v);
+	out_cb(1);
 }
 
-void load_map(const byte_t *map) {
+void load_map(const byte_t *const map) {
 	byte_t i = 0;
 	byte_t x;
 	byte_t y;
 	byte_t len;
 	
-	//PPU.control = 0;
-	//PPU.mask = 0;
-	
+	SYNC_PPU();
 	PPU.vram.address = 0x20;
 	PPU.vram.address = 0x00;
+	
+	cbit_ptr = 0;
+	cbit_shift = 0;
 	for(x = 0; x < 4; ++x) {
 		for(i = 0; i < 240; ++i) {
 			out_nt(SKY);
+			collision_bitmap[i] = 0x00;
 		}
 	}
 	
@@ -104,9 +97,9 @@ void load_map(const byte_t *map) {
 	for(;;) {
 		switch(map[i]) {
 		default:
-		case 0x00:
+		case M_DONE:
 			goto done_loading_map;
-		case 0x01: {
+		case M_HLINE: {
 			x = map[++i];
 			y = x >> 4;
 			x = x & 0xF;
@@ -139,15 +132,16 @@ void load_map(const byte_t *map) {
 			out_nt_cb(GR_BR);
 			
 			++i;
+			break;
 		}
-		case 0x02: {
+		case M_VLINE: {
 			x = map[++i];
 			y = x >> 4;
 			x = x & 0xF;
 			set_nt_cb(x << 1, y << 1);
 			
-			out_nt(GR_TL);
-			out_nt(GR_TR);
+			out_nt_cb(GR_TL);
+			out_nt_cb(GR_TR);
 			
 			len = map[++i];
 			
@@ -170,84 +164,11 @@ void load_map(const byte_t *map) {
 			}
 			
 			++i;
+			break;
 		}
 			
 		}
 	}
 	
 done_loading_map: {}
-	//PPU.control = 0b10001000;
-	//PPU.mask = 0b00011110;
-}
-
-void load_palettes(const byte_t *palettes) {
-	unsigned char i = 0;
-	
-	(void)(PPU.status);
-	
-	SYNC_PPU();
-	PPU.vram.address = 0x3F;
-	PPU.vram.address = 0x00;
-	
-	for(i = 0; i < 32; ++i) {
-		PPU.vram.data = palettes[i];
-	}
-	
-}
-
-void init_sprites() {
-	byte_t i = 0;
-	for(;;) {
-		sprite_ram[i] = 0xFF;
-		++i;
-		if(i == 0) return;
-	}
-}
-
-struct player_t {
-	unsigned short x;
-	unsigned short y;
-	short vx;
-	short vy;
-} player;
-
-byte_t player_sprite = 0x04;
-
-void player_tick() {
-	sprite_ram[player_sprite] = (player.y >> 8) - 1;
-	sprite_ram[player_sprite + 3] = (player.x >> 8);
-}
-
-void player_init() {
-	sprite_ram[player_sprite + 1] = 0;
-	sprite_ram[player_sprite + 2] = 0;
-	
-	player.x = 0x8A00;
-	player.y = 0xB500;
-	player.vx = 0;
-	player.vy = 0;
-}
-
-void main(void) {
-	
-	PPU.control = 0;
-	PPU.mask = 0;
-	
-	load_palettes(palette);
-	load_map(map_0);
-	
-	init_sprites();
-	
-	SYNC_PPU();
-	PPU.vram.address = 0x20;
-	PPU.vram.address = 0x00;
-	
-	PPU.control = 0b10001000;
-	PPU.mask = 0b00011110;
-	
-	player_init();
-	
-	for(;;) {
-		player_tick();
-	}
 }

@@ -4,10 +4,17 @@ BUILD_DIR= ./build
 SRC_DIR = ./src
 
 SRCS=\
-test.c\
+main.c\
+map.c\
+palette.c\
+player.c\
 graphics.s\
 nmi.s\
-sprite_ram.s
+sprite_ram.s\
+poll_input.s\
+prng.s
+
+
 
 $(BIN): $(SRCS:%=$(BUILD_DIR)/%.o)
 	ld65 $^ -C nes.cfg -o $(BIN) --lib smallnes.lib

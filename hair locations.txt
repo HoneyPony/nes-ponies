@@ -1,0 +1,10 @@
+0: (8, 2) (mane small) (flipped 0, 2)
+1: (4, 2) (mane large top) (flipped 4, 2)
+2: (5, 6) (mane large bottom)
+3: (-3, 7) (tail base)
+4: (-4, 9) (tail mid) (flipped 11, 9)
+5: (-3, 13) (tail end)
+
+Ordering: 3, 4, 5 behind, 0, 2 front, 1 behind
+
+other ordering: 0 > 2
