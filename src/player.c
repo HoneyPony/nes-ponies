@@ -472,7 +472,8 @@ void player_tick() {
 	}
 	
 	
-	
+	PPU.control = 0b10001000;
+	PPU.mask = 0b00011110;
 	
 	
 	
