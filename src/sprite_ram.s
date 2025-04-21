@@ -1,4 +1,4 @@
-.export _sprite_ram
+.global _sprite_ram
 
-.segment "SPRITE_BSS"
-_sprite_ram: .res 256
+.section "sprite_bss"
+_sprite_ram: .fill 256

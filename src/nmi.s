@@ -1,9 +1,9 @@
-.export _cycle_flag
+.global _cycle_flag
 
-.segment "BSS"
-_cycle_flag: .res 1
+.section "bss"
+_cycle_flag: .fill 1
 
-.segment "CODE"
+.section "text"
 
 nmi_handler:
 	; OAM DMA update
@@ -38,5 +38,5 @@ nmi_handler:
 irq_handler:
 	rti
 	
-.export nmi_handler
-.export irq_handler
+.global nmi_handler
+.global irq_handler

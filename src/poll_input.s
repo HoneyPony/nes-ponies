@@ -1,14 +1,13 @@
 JOYPAD1 = $4016
 
-.export _controller
-.export _read_controller
+.global _controller
+.global read_controller
 
-.segment "BSS"
-_controller: .res 1
+.section "bss"
+_controller: .fill 1
 
-.segment "CODE"
-.proc _read_controller
-
+.section "text"
+read_controller:
     lda #$01
     ; While the strobe bit is set, buttons will be continuously reloaded.
     ; This means that reading from JOYPAD1 will only return the state of the
@@ -25,5 +24,3 @@ loop:
     rol _controller  ; Carry -> bit 0; bit 7 -> Carry
     bcc loop
     rts
-
-.endproc

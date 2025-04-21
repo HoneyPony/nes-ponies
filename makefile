@@ -1,3 +1,9 @@
+include .config
+
+CC=$(LLVMPATH)/bin/mos-nes-clang
+AS=$(LLVMPATH)/bin/llvm-mc
+LD=$(LLVMPATH)/bin/ld.lld
+
 BIN= main.nes
 
 BUILD_DIR= ./build
@@ -17,14 +23,20 @@ prng.s
 
 
 $(BIN): $(SRCS:%=$(BUILD_DIR)/%.o)
-	ld65 $^ -C nes.cfg -o $(BIN) --lib smallnes.lib
+	$(LD) $^ -o $(BIN)
+#	ld65 $^ -C nes.cfg -o $(BIN) --lib smallnes.lib
 
 $(BUILD_DIR)/%.s.o : $(SRC_DIR)/%.s
 	mkdir -p $(BUILD_DIR)
-	ca65 $< -o $@
+	$(AS) $< -o $@ -triple mos --filetype=obj
+#	ca65 $< -o $@
 	
 $(BUILD_DIR)/%.c.o : $(SRC_DIR)/%.c
 	mkdir -p $(BUILD_DIR)
-	cc65 $< -o $@.s -t nes
-	ca65 $@.s -o $@
+	$(CC) -c $< -o $@
+#	$(AS) $@.ir -o $@ -triple mos
+#	cc65 $< -o $@.s -t nes
+#	ca65 $@.s -o $@
 	
+clean:
+	find . -name "*.o" -delete

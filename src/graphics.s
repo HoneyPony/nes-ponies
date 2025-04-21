@@ -1,2 +1,2 @@
-.segment "CHARS"
-.incbin "graphics.chr"
+.section "chars"
+.incbin "src/graphics.chr"

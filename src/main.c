@@ -72,7 +72,7 @@ void test_right() {
 	PPU.vram.address = 0x00;
 }
 
-void main(void) {
+int main(void) {
 	PPU.control = 0;
 	PPU.mask = 0;
 	
