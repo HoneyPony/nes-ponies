@@ -4,8 +4,7 @@
 cycle_flag: .fill 1
 
 .section .text
-
-nmi_handler:
+nmi:
 	; OAM DMA update
 	pha
 	tya
@@ -35,8 +34,8 @@ nmi_handler:
 	pla
 	tay
 	pla
-irq_handler:
+irq:
 	rti
 	
-.global nmi_handler
-.global irq_handler
+.global nmi
+.global irq

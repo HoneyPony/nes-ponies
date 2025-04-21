@@ -1,2 +1,2 @@
-.section .chr_rom_0
+.section .chr_rom, "aR"
 .incbin "src/graphics.chr"

@@ -48,7 +48,7 @@ const byte_t map_1[] = {
 };
 
 extern void read_controller();
-extern byte_t cycle_flag;
+extern volatile byte_t cycle_flag;
 
 void test_left() {
 	PPU.control = 0;
