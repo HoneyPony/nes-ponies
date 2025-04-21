@@ -1,4 +1,4 @@
-.global _sprite_ram
+.global sprite_ram
 
-.section .data
-_sprite_ram: .fill 256
+.section .bss
+sprite_ram: .fill 256

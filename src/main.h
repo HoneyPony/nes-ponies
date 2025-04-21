@@ -24,13 +24,13 @@ typedef unsigned char byte_t;
 
 extern byte_t controller;
 
-#include "zeropage-vars.h"
+//#include "zeropage-vars.h"
 
 extern unsigned short prng_seed;
 extern byte_t prng_out;
 
-#pragma zpsym ("prng_seed")
-#pragma zpsym ("prng_out")
+//#pragma zpsym ("prng_seed")
+//#pragma zpsym ("prng_out")
 
 #include "normal-vars.h"
 

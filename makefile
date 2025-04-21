@@ -16,11 +16,9 @@ palette.c\
 player.c\
 graphics.s\
 nmi.s\
-sprite_ram.s\
-poll_input.s\
 prng.s\
-zeropage.s
-
+sprite_ram.s\
+poll_input.s
 
 
 $(BIN): $(SRCS:%=$(BUILD_DIR)/%.o)

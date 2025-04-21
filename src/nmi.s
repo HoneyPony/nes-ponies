@@ -28,7 +28,7 @@ nmi_handler:
 	lda #02
 	sta 4014
 	
-	inc _cycle_flag
+	inc cycle_flag
 	
 	pla
 	tax
