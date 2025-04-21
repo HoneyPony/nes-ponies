@@ -23,7 +23,7 @@ prng:
 	asl        ; shift the register
 	rol prng_seed+1
 	bcc 2
-	eor #39   ; apply XOR feedback whenever a 1 bit is shifted out
+	eor #$39   ; apply XOR feedback whenever a 1 bit is shifted out
 2:
 	dey
 	bne 1

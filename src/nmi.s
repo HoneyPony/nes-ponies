@@ -13,9 +13,9 @@ nmi:
 	pha
 	
 	lda $2002
-	lda #20
+	lda #$20
 	sta $2006
-	lda #00
+	lda #$00
 	sta $2006
 	
 	sta $2005
