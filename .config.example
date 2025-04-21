@@ -1,1 +1,9 @@
+# To build:
+# Create a file called ".config" in your directory.
+#
+# Then, edit the LLVMPATH to be the path to your LLVM-MOS
+# installation.
+#
+# Then you can run 'make', which should create a 'main.nes'
+# iNES file.
 LLVMPATH=/home/yourname/llvm-mos
