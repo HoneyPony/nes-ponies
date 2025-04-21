@@ -77,11 +77,21 @@ void test_right() {
 	PPU.vram.address = 0x00;
 }
 
+void init_nametable_attributes() {
+	SYNC_PPU();
+	PPU.vram.address = 0x23;
+	PPU.vram.address = 0xC0;
+	for(byte_t i = 0; i < 64; ++i) {
+		PPU.vram.data = 0;
+	}
+}
+
 int main(void) {
 	PPU.control = 0;
 	PPU.mask = 0;
 	
 	load_palettes(game_palette);
+	init_nametable_attributes();
 	load_map(map_0);
 	
 	init_sprites();
