@@ -59,8 +59,8 @@ void set_nt(byte_t x, byte_t y) {
 	unsigned short address;
 	address = x + ((unsigned short)y << 5) + 0x2000;
 	SYNC_PPU();
-	PPU.vram.address = address >> 8;
-	PPU.vram.address = address;
+	PPU.vram.address = (byte_t)(address >> 8);
+	PPU.vram.address = (byte_t)address;
 }
 
 void set_nt_cb(byte_t x, byte_t y) {
@@ -75,9 +75,9 @@ void out_nt_cb(byte_t v) {
 
 void load_map(const byte_t *const map) {
 	byte_t i = 0;
-	byte_t x;
-	byte_t y;
-	byte_t len;
+	byte_t x = 0;
+	byte_t y = 0;
+	byte_t len = 0;
 	
 	SYNC_PPU();
 	PPU.vram.address = 0x20;
@@ -117,7 +117,9 @@ void load_map(const byte_t *const map) {
 			out_nt_cb(GR_T);
 			out_nt_cb(GR_TR);
 			
-			set_nt_cb(x << 1, (y << 1) + 1);
+			// OPTIMIZATION: Delete the function call below, it shouldn't
+			// be necessary.
+			set_nt_cb((x << 1), (y << 1) + 1);
 			
 			out_nt_cb(GR_BL);
 			out_nt_cb(GR_B);

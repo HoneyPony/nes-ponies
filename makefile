@@ -32,7 +32,7 @@ $(BUILD_DIR)/%.s.o : $(SRC_DIR)/%.s
 	
 $(BUILD_DIR)/%.c.o : $(SRC_DIR)/%.c
 	mkdir -p $(BUILD_DIR)
-	$(CC) -c $< -o $@ 
+	$(CC) -c $< -o $@ -Os
 #	$(AS) $@.ir -o $@ -triple mos
 #	cc65 $< -o $@.s -t nes
 #	ca65 $@.s -o $@

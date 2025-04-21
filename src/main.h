@@ -7,18 +7,18 @@ struct __ppu {
     unsigned char mask;                 /* color; show sprites, background */
       signed char volatile const status;
     struct {
-        unsigned char address;
-        unsigned char data;
+        unsigned volatile char address;
+        unsigned volatile char data;
     } sprite;
     unsigned char scroll;
     struct {
-        unsigned char address;
-        unsigned char data;
+        unsigned volatile char address;
+        unsigned volatile char data;
     } vram;
 };
 #define PPU             (*(struct __ppu*)0x2000)
 
-#define SYNC_PPU() __asm__ volatile("lda $2002")
+#define SYNC_PPU() __asm__ volatile("lda $2002" ::: "a", "memory")
 
 typedef unsigned char byte_t;
 
