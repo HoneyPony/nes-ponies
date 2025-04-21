@@ -1,6 +1,6 @@
 include .config
 
-CC=$(LLVMPATH)/bin/mos-nes-clang
+CC=$(LLVMPATH)/bin/mos-nes-nrom-clang
 AS=$(LLVMPATH)/bin/llvm-mc
 LD=$(LLVMPATH)/bin/ld.lld
 
@@ -23,7 +23,7 @@ prng.s
 
 
 $(BIN): $(SRCS:%=$(BUILD_DIR)/%.o)
-	$(LD) $^ -o $(BIN)
+	$(LD) $^ -o $(BIN) --oformat=binary
 #	ld65 $^ -C nes.cfg -o $(BIN) --lib smallnes.lib
 
 $(BUILD_DIR)/%.s.o : $(SRC_DIR)/%.s

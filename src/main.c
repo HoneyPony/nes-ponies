@@ -3,6 +3,11 @@
 #include "map.h"
 #include "player.h"
 
+#include <ines.h>
+
+MAPPER_PRG_ROM_KB(32);
+MAPPER_CHR_ROM_KB(8);
+
 void init_sprites() {
 	byte_t i = 0;
 	for(;;) {

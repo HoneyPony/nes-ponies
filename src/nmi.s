@@ -1,9 +1,9 @@
 .global _cycle_flag
 
-.section "bss"
+.section .bss
 _cycle_flag: .fill 1
 
-.section "text"
+.section .text
 
 nmi_handler:
 	; OAM DMA update
@@ -13,20 +13,20 @@ nmi_handler:
 	txa
 	pha
 	
-	lda $2002
-	lda #$20
-	sta $2006
-	lda #$00
-	sta $2006
+	lda 2002
+	lda #20
+	sta 2006
+	lda #00
+	sta 2006
 	
-	sta $2005
-	sta $2005 ; Set scroll to zero
+	sta 2005
+	sta 2005 ; Set scroll to zero
 	
 	; Copy Sprite OAM
-	lda #$00
-	sta $2003
-	lda #$02
-	sta $4014
+	lda #00
+	sta 2003
+	lda #02
+	sta 4014
 	
 	inc _cycle_flag
 	

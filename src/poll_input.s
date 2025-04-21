@@ -1,14 +1,14 @@
-JOYPAD1 = $4016
+JOYPAD1 = 4016
 
 .global _controller
 .global read_controller
 
-.section "bss"
+.section .bss
 _controller: .fill 1
 
-.section "text"
+.section .text
 read_controller:
-    lda #$01
+    lda #01
     ; While the strobe bit is set, buttons will be continuously reloaded.
     ; This means that reading from JOYPAD1 will only return the state of the
     ; first button: button A.
