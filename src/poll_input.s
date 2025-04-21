@@ -1,4 +1,4 @@
-JOYPAD1 = 4016
+JOYPAD1 = $4016
 
 .global controller
 .global read_controller

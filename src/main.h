@@ -18,16 +18,16 @@ struct __ppu {
 };
 #define PPU             (*(struct __ppu*)0x2000)
 
-#define SYNC_PPU() __asm__("lda 2002")
+#define SYNC_PPU() __asm__ volatile("lda $2002")
 
 typedef unsigned char byte_t;
 
-extern byte_t controller;
+extern volatile byte_t controller;
 
 //#include "zeropage-vars.h"
 
-extern unsigned short prng_seed;
-extern byte_t prng_out;
+extern volatile unsigned short prng_seed;
+extern volatile byte_t prng_out;
 
 //#pragma zpsym ("prng_seed")
 //#pragma zpsym ("prng_out")
@@ -45,6 +45,6 @@ extern void prng();
 #define J_B      (controller & 0x40)
 #define J_A      (controller & 0x80)
 
-volatile extern byte_t sprite_ram[256];
+extern volatile byte_t sprite_ram[256];
 
 #endif

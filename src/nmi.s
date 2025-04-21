@@ -12,20 +12,20 @@ nmi:
 	txa
 	pha
 	
-	lda 2002
+	lda $2002
 	lda #20
-	sta 2006
+	sta $2006
 	lda #00
-	sta 2006
+	sta $2006
 	
-	sta 2005
-	sta 2005 ; Set scroll to zero
+	sta $2005
+	sta $2005 ; Set scroll to zero
 	
 	; Copy Sprite OAM
-	lda #00
-	sta 2003
-	lda #02
-	sta 4014
+	lda #<sprite_ram
+	sta $2003
+	lda #>sprite_ram
+	sta $4014
 	
 	inc cycle_flag
 	
