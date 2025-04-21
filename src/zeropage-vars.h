@@ -1,2 +1,2 @@
-#pragma bss-name (push,"ZEROPAGE")
-#pragma data-name(push,"ZEROPAGE")
+//#pragma bss-name (push,".zp.bss")
+//#pragma data-name(push,".zp.data")

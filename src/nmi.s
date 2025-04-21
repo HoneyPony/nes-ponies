@@ -1,7 +1,7 @@
-.global _cycle_flag
+.global cycle_flag
 
 .section .bss
-_cycle_flag: .fill 1
+cycle_flag: .fill 1
 
 .section .text
 

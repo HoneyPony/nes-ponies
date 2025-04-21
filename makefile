@@ -4,7 +4,7 @@ CC=$(LLVMPATH)/bin/mos-nes-nrom-clang
 AS=$(LLVMPATH)/bin/llvm-mc
 LD=$(LLVMPATH)/bin/ld.lld
 
-BIN= main.nes
+BIN=main.nes
 
 BUILD_DIR= ./build
 SRC_DIR = ./src
@@ -18,17 +18,18 @@ graphics.s\
 nmi.s\
 sprite_ram.s\
 poll_input.s\
-prng.s
+prng.s\
+zeropage.s
 
 
 
 $(BIN): $(SRCS:%=$(BUILD_DIR)/%.o)
-	$(LD) $^ -o $(BIN) --oformat=binary
+	$(CC) $^ -o $(BIN) --verbose -Wl,--verbose 
 #	ld65 $^ -C nes.cfg -o $(BIN) --lib smallnes.lib
 
 $(BUILD_DIR)/%.s.o : $(SRC_DIR)/%.s
 	mkdir -p $(BUILD_DIR)
-	$(AS) $< -o $@ -triple mos --filetype=obj
+	$(CC) -c $< -o $@
 #	ca65 $< -o $@
 	
 $(BUILD_DIR)/%.c.o : $(SRC_DIR)/%.c

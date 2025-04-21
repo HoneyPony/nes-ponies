@@ -11,29 +11,29 @@
 ;
 ; Execution time is an average of 125 cycles (excluding jsr and rts)
 
-.section .zeropage
-_prng_seed: .fill 2       ; initialize 16-bit seed to any value except 0
-_prng_out: .fill 1
+.section .zp.data
+prng_seed: .fill 2       ; initialize 16-bit seed to any value except 0
+prng_out: .fill 1
 
 .section .text
 prng:
 	ldy #8     ; iteration count (generates 8 bits)
-	lda _prng_seed+0
+	lda prng_seed+0
 1:
 	asl        ; shift the register
-	rol _prng_seed+1
+	rol prng_seed+1
 	bcc 2
 	eor #39   ; apply XOR feedback whenever a 1 bit is shifted out
 2:
 	dey
 	bne 1
-	sta _prng_seed+0
+	sta prng_seed+0
 	cmp #0     ; reload flags
 	
-	sta _prng_out
+	sta prng_out
 	
 	rts
 
-.global _prng_seed
-.global _prng_out
+.global prng_seed
+.global prng_out
 .global prng
